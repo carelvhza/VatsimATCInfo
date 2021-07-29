@@ -52,6 +52,13 @@ namespace VatsimATCInfo.Models
         public FlightPlan flight_plan { get; set; }
         public DateTime logon_time { get; set; }
         public DateTime last_updated { get; set; }
+
+        public string dep_airport_name { get; set; }
+        public string arr_airport_name { get; set; }
+        public double distance_from_dep { get; set; }
+        public double distance_to_arr { get; set; }
+        public string status { get; set; }
+        public int calculated_arrival_time { get; set; }
     }
 
     public class Controller

@@ -1,28 +1,244 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/theme_light.css" />
+    <link rel="stylesheet" type="text/css" href="css/all.min.css"/>
 </head>
-<body>
-    <div class="container">
+<style>
+    .fix-top {
+        margin-bottom: 1px;
+    }
 
-        <h3>Vatsim ATC Info</h3>
-        <h5>Pilots: <span class="pilots text-info"></span></h5>
-        <h5>Metar: <span class="metar text-info"></span></h5>
-        <div class="row">
-            <div class="col-lg-3">
-                <div class="form-group">
-                    <label class="col-form-label mt-4" for="inputDefault">ICAO</label>
-                    <input type="text" class="form-control" placeholder="ICAO" id="inputDefault">
+    .icao-search {
+        width: 80px;
+    }
+
+    .temp-label-f {
+        position: absolute;
+        right: 75px;
+    }
+    .temp-label-c {
+        position: absolute;
+        right: 10px;
+    }    
+    .set-inline {
+        display:inline;
+    }
+</style>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Vatsim ATC Info</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor03" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarColor03">
+                <ul class="navbar-nav me-auto">
+                    <!--<li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            Home
+                            <span class="visually-hidden">(current)</span>
+                        </a>
+                    </li>-->
+                    <!--<li class="nav-item">
+                        <a class="nav-link" href="#">Info</a>
+                    </li>-->
+                    <!--<li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Action</a>
+                            <a class="dropdown-item" href="#">Another action</a>
+                            <a class="dropdown-item" href="#">Something else here</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Separated link</a>
+                        </div>
+                    </li>-->
+                </ul>
+                <div class="d-flex fix-top">
+                    <input class="form-control me-sm-2 icao-search" type="text" placeholder="ICAO">
+                    <button class="btn btn-secondary my-2 my-sm-0">Load</button>
                 </div>
             </div>
         </div>
+    </nav>
+    <div class="container">
+        <div class="row" style="margin-top:20px;">
+            <div class="col-lg-8">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card text-white bg-dark mb-3" style="max-width: 100%;">
+                            <div class="card-body">
+                                <h4 class="card-title">FAOR</h4>
+                                <p class="card-text">OR Tambo International Airport</p>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <h5 class="card-title set-inline">FAOR_ATIS</h5><span class="card-subtitle text-muted set-inline"> | 126.500</span>
 
+                                </li>
+                                <li class="list-group-item">
+                                    <h5 class="card-title set-inline">FAOR_GND</h5><span class="card-subtitle text-muted set-inline"> | 121.650</span>
+                                </li>
+                                <li class="list-group-item">
+                                    <h5 class="card-title set-inline">FAOR_TWR</h5><span class="card-subtitle text-muted set-inline"> | 118.100</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>               
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card text-white bg-success mb-3" style="max-width: 30rem;">
+                                    <div class="card-header">Departures</div>
+                                    <div class="card-body">
+                                        <ul id="depList" class="list-group list-group-flush">
+                                            <!--<li class="list-group-item">
+                                                <h5 style="float:right">15:55<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i></h5>
+                                                <h5 class="card-title"><strong>BAW998</strong> <span class="text-dark">H/B772</span></h5>
+                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">To </sup><strong>OMDB</strong> <span class="text-muted">Dubai International Airport</span></h6>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <h5 style="float:right">16:00<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i></h5>
+                                                <h5 class="card-title"><strong>SAA272</strong> <span class="text-dark">H/B77L/L</span></h5>
+                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">To </sup><strong>FACT</strong> <span class="text-muted">Cape Town International Airport</span></h6>
+                                            </li>
+                                            <li class="list-group-item">
+                                                <h5 style="float:right">16:15<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i></h5>
+                                                <h5 class="card-title"><strong>SAA234</strong> <span class="text-dark">H/A333/L</span></h5>
+                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">To </sup><strong>EGLL</strong> <span class="text-muted">London City</span></h6>
+                                            </li>-->
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card text-black bg-light mb-3" style="max-width: 30rem;">
+                                    <div class="card-header">Filed Departures</div>
+                                    <div class="card-body">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item">
+                                                <h5 style="float:right">20:00<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i></h5>
+                                                <h5 class="card-title"><strong>KLM112</strong> <span class="text-dark">H/B772</span></h5>
+                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">To </sup><strong>FGRB</strong> <span class="text-muted">Robert Mugabe International Airport</span></h6>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card text-white bg-danger mb-3" style="max-width: 30rem;">
+                                    <div class="card-header">Arrivals</div>
+                                    <div class="card-body">
+                                        <ul id="arrList" class="list-group list-group-flush">
+                                            <!--<li class="list-group-item">
+                                                <h5 style="float:right">18:12<span class="text-muted">z</span> <i class="fas fa-plane-arrival text-primary"></i></h5>
+                                                <h5 class="card-title"><strong>KLM591</strong> <span class="text-dark">H/B77W</span></h5>
+                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">From </sup><strong>EHAM</strong> <span class="text-muted">Amsterdam International Airport</span></h6>
+                                            </li>-->
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card text-black bg-light mb-3" style="max-width: 30rem;">
+                                    <div class="card-header">Filed Arrivals</div>
+                                    <div class="card-body">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item">
+                                                <h5 style="float:right">20:00<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i></h5>
+                                                <h5 class="card-title"><strong>KLM112</strong> <span class="text-dark">H/B772</span></h5>
+                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">From </sup><strong>FGRB</strong> <span class="text-muted">Robert Mugabe International Airport</span></h6>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="row">
 
+                        </div>
+                    </div>
 
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card mb-3 ">
+                            <span class="card-header text-white bg-primary">
+                                <span style="font-size:larger">Weather</span>
+                                <span style="float:right">
+                                    <span class="form-check form-switch" style="margin-right: 20px; border-radius: 5px; background: rgba(255,255,255,0.3); padding-left: 40px;">
+                                        <label class="form-check-label temp-label-f" for="flewSwitchTemp">°F</label>
+                                        <label class="form-check-label temp-label-c" for="flewSwitchTemp">°C</label>
+                                        <input class="form-check-input" type="checkbox" id="flewSwitchTemp" checked>
+
+                                    </span>
+                                </span>
+                            </span>
+                            <div class="card-body">
+                                <h5 class="card-title">METAR</h5>
+                                <h6 class="card-subtitle text-muted">FAOR 291730Z 20004G14KT 150V270 CAVOK 13/M05 Q1031 NOSIG</h6>
+                            </div>
+                            <div style="text-align:center">
+                                <img src="images/compass_vector.jpg" style="width:15vw" />
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <span class="card-text"><sup>QNH</sup> <strong>1031</strong> | <sup>ALT</sup> <strong>30.45</strong></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <span class="card-text"><sup>Temp </sup><strong>10</strong>°C | <sup>Dew</sup> <strong>-5</strong>°C</span>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <span class="card-text"><sup>Visibility</sup> <strong>>10000m</strong></span>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="card-body">
+                                <h5 class="text-primary">Clouds</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item"><strong>Broken</strong> 100ft</li>
+                                    <li class="list-group-item"><strong>Overcast</strong> 3500ft</li>
+                                    <li class="list-group-item"><strong>Scattered</strong> 26500ft</li>
+                                </ul>
+                            </div>
+
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><strong>Density Alt</strong> 5700ft</li>                              
+                            </ul>
+
+                            <div class="card-footer text-muted">
+                                Last Update 29/07/21 19:00 (16 min ago)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
     <script>
+        var globalIcao = 'FAOR';
+        var globalAirportHeight = 5558;
         var url = window.location.host;
         var uri = `https://${window.location.host}/vatsim.asmx`;
 
@@ -43,7 +259,7 @@
                 });
 
             const sendData = {
-                icao: 'FAOR'
+                icao: globalIcao
             }
 
             $.ajax(uri + '/GetMetar',
@@ -60,14 +276,121 @@
         }
 
         function updateData(data) {
-            console.log(data);
-            $('.pilots').html(data.pilots.length);
+            // Departures
+            const flightPlanPilots = data.pilots.filter(pi => pi.flight_plan != null);
+            const departures = flightPlanPilots.filter(pi => pi.flight_plan.departure === globalIcao).sort((a, b) => { return a > b; });
+            const arrivals = flightPlanPilots.filter(pi => pi.flight_plan.arrival === globalIcao).sort((a, b) => { return a > b; });
+
+            $('#depList').fadeOut(800, () => {
+                $('#depList').html('');
+                $('#depList').show();
+                let counter = 0;
+                for (let plane of departures) {
+                    counter += 300;
+                    let timez = "";
+                    let isAirborne = false;
+
+                    let iconString = "";
+                    switch (plane.status) {
+                        case "Preparing":
+                            iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i>`;
+                            break;
+                        case "Taxi Out":
+                        case "Departing":
+                            iconString = `Departing  <i class="fas fa-plane-departure text-primary"></i>`;
+                            break;
+                        case "Airborne":
+                            isAirborne = true;
+                            iconString = `Arriving ${plane.calculated_arrival_time.toString().padStart(4, 0).substring(0, 2)}:${plane.calculated_arrival_time.toString().padStart(4, 0).substring(2, 4)}<span class="text-muted">z</span> <i class="fas fa-plane text-primary"></i>`;
+                            break;
+                        case "Arriving":
+                        case "Taxy In":
+                            iconString = `Arriving at Airport <i class="fas fa-plane-arrival text-primary"></i>`;
+                            break;
+                        case "Arrived":
+                            iconString = `Arrived at Airport <i class="fas fa-check text-primary"></i>`;
+                            break;
+                    }
+
+                    let disabled = (isAirborne) ? 'opacity:0.8;' : '';
+                    let cardString = `  <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none; ${disabled}' >
+                                            <h5 style="float:right">${iconString}</h5>
+                                            <h5 class="card-title"><strong>${plane.callsign}</strong> <span class="text-dark">${plane.flight_plan.aircraft_faa}</span></h5>
+                                            <h6 class="card-subtitle text-danger"><sup class="text-muted">To </sup><strong>${plane.flight_plan.arrival}</strong> <span class="text-muted">${plane.arr_airport_name}</span></h6>
+                                        </li>`
+                    $('#depList').append(cardString);
+                    $(`#id-${plane.callsign}`).fadeIn(300 + counter);
+                }
+            });
+
+            $('#arrList').fadeOut(800, () => {
+                $('#arrList').html('');
+                $('#arrList').show();
+                let counter = 0;
+                for (let plane of arrivals) {
+                    counter += 300;
+                    let isAirborne = false;                 
+
+                    let iconString = "";
+                    switch (plane.status) {
+                        case "Preparing":
+                            iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i>`;
+                            break;
+                        case "Taxi Out":
+                        case "Departing":
+                            iconString = `Departing  <i class="fas fa-plane-departure text-primary"></i>`;
+                            break;
+                        case "Airborne":
+                            isAirborne = true;
+                            iconString = `Arriving ${plane.calculated_arrival_time.toString().padStart(4, 0).substring(0, 2)}:${plane.calculated_arrival_time.toString().padStart(4, 0).substring(2, 4)}<span class="text-muted">z</span> <i class="fas fa-plane text-primary"></i>`;
+                            break;
+                        case "Arriving":
+                        case "Taxy In":
+                            iconString = `Arriving at Airport <i class="fas fa-plane-arrival text-primary"></i>`;
+                            break;
+                        case "Arrived":
+                            iconString = `Arrived at Airport <i class="fas fa-check text-primary"></i>`;
+                            break;
+                    }
+
+                    let disabled = (!isAirborne) ? 'opacity:0.8;' : '';
+                    let cardString = `  <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none; ${disabled}' >
+                                            <h5 style="float:right">${iconString}</h5>
+                                            <h5 class="card-title"><strong>${plane.callsign}</strong> <span class="text-dark">${plane.flight_plan.aircraft_faa}</span></h5>
+                                            <h6 class="card-subtitle text-danger"><sup class="text-muted">From </sup><strong>${plane.flight_plan.departure}</strong> <span class="text-muted">${plane.dep_airport_name}</span></h6>
+                                        </li>`
+                    $('#arrList').append(cardString);
+                    $(`#id-${plane.callsign}`).fadeIn(300 + counter);
+                }
+            });
+            
+
+
+            console.log(arrivals);    
         }
 
         function updateMetar(data) {
             console.log(data);
-            $('.metar').html(data.RawMetar);            
+
         }
+
+        //function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+        //    var R = 6371; // Radius of the earth in km
+        //    var dLat = deg2rad(lat2 - lat1);  // deg2rad below
+        //    var dLon = deg2rad(lon2 - lon1);
+        //    var a =
+        //        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        //        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        //        Math.sin(dLon / 2) * Math.sin(dLon / 2)
+        //        ;
+        //    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        //    var d = R * c; // Distance in km
+        //    return d;
+        //}
+
+        //function deg2rad(deg) {
+        //    return deg * (Math.PI / 180)
+        //}
     </script>
 </body>
 </html>
