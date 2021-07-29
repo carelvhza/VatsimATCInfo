@@ -43,6 +43,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="csharp-metar-decoder, Version=1.0.0.40, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\csharp-metar-decoder.1.0.0.40\lib\Net45\csharp-metar-decoder.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="RestSharp, Version=106.12.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
       <HintPath>..\packages\RestSharp.106.12.0\lib\net452\RestSharp.dll</HintPath>
@@ -80,6 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
+    <Content Include="index.html" />
     <Content Include="vatsim.asmx" />
     <Content Include="Web.config" />
   </ItemGroup>

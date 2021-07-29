@@ -15,3 +15,5 @@ C:\Users\Carel.VanHemert\source\repos\VatsimATCInfo\VatsimATCInfo\obj\Debug\Vats
 C:\Users\Carel.VanHemert\source\repos\VatsimATCInfo\VatsimATCInfo\obj\Debug\VatsimATCInfo.csproj.CopyComplete
 C:\Users\Carel.VanHemert\source\repos\VatsimATCInfo\VatsimATCInfo\obj\Debug\VatsimATCInfo.dll
 C:\Users\Carel.VanHemert\source\repos\VatsimATCInfo\VatsimATCInfo\obj\Debug\VatsimATCInfo.pdb
+C:\Users\Carel.VanHemert\source\repos\VatsimATCInfo\VatsimATCInfo\bin\csharp-metar-decoder.dll
+C:\Users\Carel.VanHemert\source\repos\VatsimATCInfo\VatsimATCInfo\obj\Debug\VatsimATCInfo.csprojAssemblyReference.cache
