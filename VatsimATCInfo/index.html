@@ -1,0 +1,17 @@
+<html>
+<head>
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</html>
+<script>
+	$.ajax('https://sky-net.co.za/vatsim.asmx/GetData',   // request url
+    {	
+   		dataType: 'json',
+		 async: false,
+            contentType: "application/json; charset=utf-8",
+		type: 'POST',
+        success: function (data, status, xhr) {// success callback function
+            console.log(data);
+    }
+});
+</script>
