@@ -142,5 +142,14 @@ namespace VatsimATCInfo.Models
         public List<Facility> facilities { get; set; }
         public List<Rating> ratings { get; set; }
         public List<PilotRating> pilot_ratings { get; set; }
+        public string current_airport_name { get; set; }
+        public int airport_height { get; set; }
+        public List<ATC> online_atc { get; set; }
+    }
+
+    public class ATC
+    {
+        public string callsign { get; set; }
+        public string frequency { get; set; }
     }
 }

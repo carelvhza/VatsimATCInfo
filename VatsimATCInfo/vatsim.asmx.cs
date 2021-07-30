@@ -25,7 +25,7 @@ namespace VatsimATCInfo
 
         [WebMethod]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
-        public VatsimData GetData()
+        public VatsimData GetData(string icao)
         {
             var client = new RestClient("https://data.vatsim.net/");
             var request = new RestRequest("v3/vatsim-data.json", DataFormat.Json);
@@ -55,6 +55,14 @@ namespace VatsimATCInfo
                     });
                 }
             }
+
+            val.current_airport_name = airportData.FirstOrDefault(air => air.ICAO == icao)?.Name;
+            if (val.current_airport_name != null)
+            {
+                val.airport_height = airportData.FirstOrDefault(air => air.ICAO == icao).Altitude;
+            }
+
+            val.pilots = val.pilots.Where(pi => pi.flight_plan != null && (pi.flight_plan?.arrival == icao || pi.flight_plan?.departure == icao)).ToList();
 
             foreach (var pilot in val.pilots.Where(a => a.flight_plan != null))
             {
@@ -87,7 +95,7 @@ namespace VatsimATCInfo
                     {
                         pilot.status = "Departing";
                     }
-                    else if (pilot.distance_to_arr <= 6000 && pilot.groundspeed > 40 && pilot.altitude > arrAirport.Altitude + 10)
+                    else if (pilot.distance_to_arr <= 55500 && pilot.groundspeed > 40 && pilot.altitude > arrAirport.Altitude + 10)
                     {
                         pilot.status = "Arriving";
                     }
@@ -102,6 +110,11 @@ namespace VatsimATCInfo
                     else
                     {
                         pilot.status = "Preparing";
+                    }
+
+                    if (pilot.distance_to_arr <= 55500 && pilot.groundspeed > 40 && pilot.altitude > arrAirport.Altitude + 10)
+                    {
+                        pilot.status = "Arriving";
                     }
 
                     if (pilot.groundspeed > 0)

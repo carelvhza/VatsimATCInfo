@@ -87,6 +87,8 @@
     <Content Include="css\theme_light.css" />
     <Content Include="Global.asax" />
     <Content Include="images\compass_vector.jpg" />
+    <Content Include="images\windneedle.png" />
+    <Content Include="images\windneedle_var.png" />
     <Content Include="index.html" />
     <Content Include="vatsim.asmx" />
     <Content Include="Web.config" />

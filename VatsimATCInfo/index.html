@@ -15,7 +15,7 @@
 
     .temp-label-f {
         position: absolute;
-        right: 75px;
+        right: 85px;
     }
     .temp-label-c {
         position: absolute;
@@ -23,6 +23,59 @@
     }    
     .set-inline {
         display:inline;
+    }
+    .airport-name {
+        font-size:smaller;
+    }
+    .time-tag {
+        position: absolute;
+        right: 0;
+        top: 0;
+        margin-top: 5px;
+        margin-right: 5px;    
+    }
+    .wind-text {
+        position: absolute;
+        margin: auto;
+        height: 90px;
+        width: 130px;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        color: var(--bs-black);
+        padding: 4px;   
+        box-shadow: rgba(0,0,0,0.3) 5px 5px 5px 5px;
+        border-radius: 3px;
+    }
+    .wind-needle, .wind-needle-var, .wind-needle-var2 {
+        position: absolute;
+        width: 15vw;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        transform: translate(-4px);
+        transition: transform ease-in-out 2s
+    }
+
+    .wind-needle-var, .wind-needle-var2 {
+        width:13vw;
+    }
+    .progress-bar-loader {
+        position: absolute;
+        width: 100%;
+        height:10px;
+        border-radius:0px;
+    }
+    .progress-bar-loader2 {
+        position: absolute;
+        width: 100%;
+        height: 10px;
+        top: 40px;
+        border-radius: 0px;
     }
 </style>
 <body>
@@ -55,76 +108,46 @@
                     </li>-->
                 </ul>
                 <div class="d-flex fix-top">
-                    <input class="form-control me-sm-2 icao-search" type="text" placeholder="ICAO">
-                    <button class="btn btn-secondary my-2 my-sm-0">Load</button>
+                    <input id="icaoCode" class="form-control me-sm-2 icao-search" type="text" placeholder="ICAO">
+                    <button id="loadIcao" class="btn btn-secondary my-2 my-sm-0">Load</button>
                 </div>
             </div>
         </div>
     </nav>
+    <div class="progress progress-bar-loader">
+        <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%;"></div>
+    </div>
     <div class="container">
         <div class="row" style="margin-top:20px;">
+            <!-- Left Col -->
             <div class="col-lg-8">
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="card text-white bg-dark mb-3" style="max-width: 100%;">
                             <div class="card-body">
-                                <h4 class="card-title">FAOR</h4>
-                                <p class="card-text">OR Tambo International Airport</p>
+                                <h4 id="icaoLabel" class="card-title"></h4>
+                                <p id="airportName" class="card-text"></p>
                             </div>
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item">
-                                    <h5 class="card-title set-inline">FAOR_ATIS</h5><span class="card-subtitle text-muted set-inline"> | 126.500</span>
-
-                                </li>
-                                <li class="list-group-item">
-                                    <h5 class="card-title set-inline">FAOR_GND</h5><span class="card-subtitle text-muted set-inline"> | 121.650</span>
-                                </li>
-                                <li class="list-group-item">
-                                    <h5 class="card-title set-inline">FAOR_TWR</h5><span class="card-subtitle text-muted set-inline"> | 118.100</span>
-                                </li>
-                            </ul>
                         </div>
                     </div>
-                </div>               
+                </div>
                 <div class="row">
                     <div class="col-lg-6">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card text-black bg-light mb-3" style="max-width: 30rem;">
+                                    <div class="card-header">Filed Departures</div>
+                                    <div class="card-body">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-lg-12">
                                 <div class="card text-white bg-success mb-3" style="max-width: 30rem;">
                                     <div class="card-header">Departures</div>
                                     <div class="card-body">
                                         <ul id="depList" class="list-group list-group-flush">
-                                            <!--<li class="list-group-item">
-                                                <h5 style="float:right">15:55<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i></h5>
-                                                <h5 class="card-title"><strong>BAW998</strong> <span class="text-dark">H/B772</span></h5>
-                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">To </sup><strong>OMDB</strong> <span class="text-muted">Dubai International Airport</span></h6>
-                                            </li>
-                                            <li class="list-group-item">
-                                                <h5 style="float:right">16:00<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i></h5>
-                                                <h5 class="card-title"><strong>SAA272</strong> <span class="text-dark">H/B77L/L</span></h5>
-                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">To </sup><strong>FACT</strong> <span class="text-muted">Cape Town International Airport</span></h6>
-                                            </li>
-                                            <li class="list-group-item">
-                                                <h5 style="float:right">16:15<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i></h5>
-                                                <h5 class="card-title"><strong>SAA234</strong> <span class="text-dark">H/A333/L</span></h5>
-                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">To </sup><strong>EGLL</strong> <span class="text-muted">London City</span></h6>
-                                            </li>-->
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="card text-black bg-light mb-3" style="max-width: 30rem;">
-                                    <div class="card-header">Filed Departures</div>
-                                    <div class="card-body">
-                                        <ul class="list-group list-group-flush">
-                                            <li class="list-group-item">
-                                                <h5 style="float:right">20:00<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i></h5>
-                                                <h5 class="card-title"><strong>KLM112</strong> <span class="text-dark">H/B772</span></h5>
-                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">To </sup><strong>FGRB</strong> <span class="text-muted">Robert Mugabe International Airport</span></h6>
-                                            </li>
                                         </ul>
                                     </div>
                                 </div>
@@ -134,31 +157,19 @@
                     <div class="col-lg-6">
                         <div class="row">
                             <div class="col-lg-12">
-                                <div class="card text-white bg-danger mb-3" style="max-width: 30rem;">
-                                    <div class="card-header">Arrivals</div>
+                                <div class="card text-black bg-light mb-3" style="max-width: 30rem;">
+                                    <div class="card-header">Filed Arrivals</div>
                                     <div class="card-body">
-                                        <ul id="arrList" class="list-group list-group-flush">
-                                            <!--<li class="list-group-item">
-                                                <h5 style="float:right">18:12<span class="text-muted">z</span> <i class="fas fa-plane-arrival text-primary"></i></h5>
-                                                <h5 class="card-title"><strong>KLM591</strong> <span class="text-dark">H/B77W</span></h5>
-                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">From </sup><strong>EHAM</strong> <span class="text-muted">Amsterdam International Airport</span></h6>
-                                            </li>-->
-                                        </ul>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-lg-12">
-                                <div class="card text-black bg-light mb-3" style="max-width: 30rem;">
-                                    <div class="card-header">Filed Arrivals</div>
+                                <div class="card text-white bg-danger mb-3" style="max-width: 30rem;">
+                                    <div class="card-header">Arrivals</div>
                                     <div class="card-body">
-                                        <ul class="list-group list-group-flush">
-                                            <li class="list-group-item">
-                                                <h5 style="float:right">20:00<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i></h5>
-                                                <h5 class="card-title"><strong>KLM112</strong> <span class="text-dark">H/B772</span></h5>
-                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">From </sup><strong>FGRB</strong> <span class="text-muted">Robert Mugabe International Airport</span></h6>
-                                            </li>
+                                        <ul id="arrList" class="list-group list-group-flush">
                                         </ul>
                                     </div>
                                 </div>
@@ -173,6 +184,7 @@
 
                 </div>
             </div>
+            <!-- Right col -->
             <div class="col-lg-4">
                 <div class="row">
                     <div class="col-lg-12">
@@ -180,53 +192,60 @@
                             <span class="card-header text-white bg-primary">
                                 <span style="font-size:larger">Weather</span>
                                 <span style="float:right">
-                                    <span class="form-check form-switch" style="margin-right: 20px; border-radius: 5px; background: rgba(255,255,255,0.3); padding-left: 40px;">
+                                    <span class="form-check form-switch" style="margin-right: 20px; border-radius: 5px; background: rgba(255,255,255,0.3); padding-left: 46px;;">
                                         <label class="form-check-label temp-label-f" for="flewSwitchTemp">°F</label>
                                         <label class="form-check-label temp-label-c" for="flewSwitchTemp">°C</label>
                                         <input class="form-check-input" type="checkbox" id="flewSwitchTemp" checked>
-
                                     </span>
                                 </span>
                             </span>
+                            <div class="progress progress-bar-loader2">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%;"></div>
+                            </div>
                             <div class="card-body">
                                 <h5 class="card-title">METAR</h5>
-                                <h6 class="card-subtitle text-muted">FAOR 291730Z 20004G14KT 150V270 CAVOK 13/M05 Q1031 NOSIG</h6>
+                                <h6 id="rawMetar" class="card-subtitle text-muted">Waiting for METAR...</h6>
                             </div>
-                            <div style="text-align:center">
+                            <div style="text-align:center; position:relative">
+                                <div class="wind-text">
+                                    <h5 class="text-primary"><strong id="windLabel"></strong></h5>
+                                    <h5 class="text-danger"><strong id="windVariable"></strong></h5>
+                                    <h5 class="text-warning"><strong id="windGusting"></strong></h5>
+                                </div>
                                 <img src="images/compass_vector.jpg" style="width:15vw" />
+                                <img src="images/windneedle.png" class="wind-needle" />
+                                <img src="images/windneedle_var.png" class="wind-needle-var" />
+                                <img src="images/windneedle_var.png" class="wind-needle-var2" />
                             </div>
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <span class="card-text"><sup>QNH</sup> <strong>1031</strong> | <sup>ALT</sup> <strong>30.45</strong></span>
+                                        <span class="card-text"><sup>QNH</sup> <strong id="labelQnh">-</strong> | <sup>ALT</sup> <strong id="labelAlt">-</strong></span>
                                     </div>
                                     <div class="col-md-6">
-                                        <span class="card-text"><sup>Temp </sup><strong>10</strong>°C | <sup>Dew</sup> <strong>-5</strong>°C</span>
+                                        <span class="card-text"><sup>Temp </sup><strong id="labelTemp"></strong> | <sup>Dew</sup> <strong id="labelDew">-</strong></span>
                                     </div>
                                 </div>
                                 <hr />
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <span class="card-text"><sup>Visibility</sup> <strong>>10000m</strong></span>
+                                        <span class="card-text"><sup>Visibility</sup> <strong id="labelVisibility"></strong></span>
                                     </div>
                                 </div>
 
                             </div>
                             <div class="card-body">
                                 <h5 class="text-primary">Clouds</h5>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item"><strong>Broken</strong> 100ft</li>
-                                    <li class="list-group-item"><strong>Overcast</strong> 3500ft</li>
-                                    <li class="list-group-item"><strong>Scattered</strong> 26500ft</li>
+                                <ul id="cloudList" class="list-group list-group-flush">
                                 </ul>
                             </div>
 
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item"><strong>Density Alt</strong> 5700ft</li>                              
-                            </ul>
+                            <!--<ul class="list-group list-group-flush">
+        <li class="list-group-item"><strong>Density Alt</strong> <span id="labelDensity"></span>ft</li>
+    </ul>-->
 
-                            <div class="card-footer text-muted">
-                                Last Update 29/07/21 19:00 (16 min ago)
+                            <div class="card-footer text-muted" id="lastUpdate">
+                                Waiting for update...
                             </div>
                         </div>
                     </div>
@@ -237,49 +256,73 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
     <script>
-        var globalIcao = 'FAOR';
+        var globalIcao = localStorage.getItem('icao');
+        if (!globalIcao || globalIcao === '') {
+            globalIcao = 'FAOR';
+        }
         var globalAirportHeight = 5558;
         var url = window.location.host;
         var uri = `https://${window.location.host}/vatsim.asmx`;
+        var globalTick;
 
         $(document).ready(() => {
+            var current = localStorage.getItem('temptype');
+            if (!current || current === '') {
+                current = true;
+            }
+            console.log(current);
+            $('#flewSwitchTemp').prop('checked', (current == 'true'));
             getDataFromServer();
         });
 
         function getDataFromServer() {
-            $.ajax(uri + '/GetData',
-                {
-                    dataType: 'json',
-                    async: false,
-                    contentType: "application/json; charset=utf-8",
-                    type: 'POST',
-                    success: function (data, status, xhr) {
-                        updateData(data.d);
-                    }
-                });
-
+            $('.progress-bar-loader').fadeIn(100);
+            $('.progress-bar-loader2').fadeIn(100);
             const sendData = {
                 icao: globalIcao
             }
 
-            $.ajax(uri + '/GetMetar',
+            $.ajax(uri + '/GetData',
                 {
                     dataType: 'json',
-                    async: false,
+                    async: true,
                     data: JSON.stringify(sendData),
                     contentType: "application/json; charset=utf-8",
                     type: 'POST',
                     success: function (data, status, xhr) {
+                        $('.progress-bar-loader').fadeOut(100);
+                        updateData(data.d);
+                    }
+                });
+
+            $.ajax(uri + '/GetMetar',
+                {
+                    dataType: 'json',
+                    async: true,
+                    data: JSON.stringify(sendData),
+                    contentType: "application/json; charset=utf-8",
+                    type: 'POST',
+                    success: function (data, status, xhr) {
+                        $('.progress-bar-loader2').fadeOut(100);
                         updateMetar(data.d);
                     }
                 });
+            
+            globalTick = setTimeout(() => { getDataFromServer(); }, 60000);
         }
 
         function updateData(data) {
-            // Departures
+
+            $('#icaoLabel').html(globalIcao);
+            $('#airportName').html(data.current_airport_name);
+            globalAirportHeight = data.airport_height;
+
             const flightPlanPilots = data.pilots.filter(pi => pi.flight_plan != null);
+            const preFlightPlanPilots = data.prefiles.filter(pi => pi.flight_plan != null);
             const departures = flightPlanPilots.filter(pi => pi.flight_plan.departure === globalIcao).sort((a, b) => { return a > b; });
             const arrivals = flightPlanPilots.filter(pi => pi.flight_plan.arrival === globalIcao).sort((a, b) => { return a > b; });
+            const filedDepartures = preFlightPlanPilots.filter(pi => pi.flight_plan.arrival === globalIcao).sort((a, b) => { return a > b; });
+            const filedArrivals = preFlightPlanPilots.filter(pi => pi.flight_plan.arrival === globalIcao).sort((a, b) => { return a > b; });
 
             $('#depList').fadeOut(800, () => {
                 $('#depList').html('');
@@ -296,28 +339,35 @@
                             iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i>`;
                             break;
                         case "Taxi Out":
+                            iconString = `Taxi to Rwy <i class="fas fa-plane-departure text-primary"></i>`;
+                            break;
                         case "Departing":
                             iconString = `Departing  <i class="fas fa-plane-departure text-primary"></i>`;
                             break;
                         case "Airborne":
                             isAirborne = true;
-                            iconString = `Arriving ${plane.calculated_arrival_time.toString().padStart(4, 0).substring(0, 2)}:${plane.calculated_arrival_time.toString().padStart(4, 0).substring(2, 4)}<span class="text-muted">z</span> <i class="fas fa-plane text-primary"></i>`;
+                            iconString = `ETA ${plane.calculated_arrival_time.toString().padStart(4, 0).substring(0, 2)}:${plane.calculated_arrival_time.toString().padStart(4, 0).substring(2, 4)}<span class="text-muted">z</span> <i class="fas fa-plane text-primary"></i>`;
                             break;
                         case "Arriving":
-                        case "Taxy In":
+                            isAirborne = true;
                             iconString = `Arriving at Airport <i class="fas fa-plane-arrival text-primary"></i>`;
                             break;
+                        case "Taxi In":
+                            isAirborne = true;
+                            iconString = `Taxi to Parking <i class="fas fa-plane-arrival text-primary"></i>`;
+                            break;
                         case "Arrived":
+                            isAirborne = true;
                             iconString = `Arrived at Airport <i class="fas fa-check text-primary"></i>`;
                             break;
                     }
 
                     let disabled = (isAirborne) ? 'opacity:0.8;' : '';
                     let cardString = `  <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none; ${disabled}' >
-                                            <h5 style="float:right">${iconString}</h5>
-                                            <h5 class="card-title"><strong>${plane.callsign}</strong> <span class="text-dark">${plane.flight_plan.aircraft_faa}</span></h5>
-                                            <h6 class="card-subtitle text-danger"><sup class="text-muted">To </sup><strong>${plane.flight_plan.arrival}</strong> <span class="text-muted">${plane.arr_airport_name}</span></h6>
-                                        </li>`
+                                                <h5 class="time-tag">${iconString}</h5>
+                                                <h5 class="card-title"><strong>${plane.callsign}</strong> <span class="text-dark">${plane.flight_plan.aircraft_faa}</span></h5>
+                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">To </sup><strong>${plane.flight_plan.arrival}</strong> <span class="text-muted airport-name">${plane.arr_airport_name}</span></h6>
+                                            </li>`
                     $('#depList').append(cardString);
                     $(`#id-${plane.callsign}`).fadeIn(300 + counter);
                 }
@@ -329,7 +379,7 @@
                 let counter = 0;
                 for (let plane of arrivals) {
                     counter += 300;
-                    let isAirborne = false;                 
+                    let isAirborne = false;
 
                     let iconString = "";
                     switch (plane.status) {
@@ -341,11 +391,11 @@
                             iconString = `Departing  <i class="fas fa-plane-departure text-primary"></i>`;
                             break;
                         case "Airborne":
-                            isAirborne = true;
-                            iconString = `Arriving ${plane.calculated_arrival_time.toString().padStart(4, 0).substring(0, 2)}:${plane.calculated_arrival_time.toString().padStart(4, 0).substring(2, 4)}<span class="text-muted">z</span> <i class="fas fa-plane text-primary"></i>`;
+
+                            iconString = `ETA ${plane.calculated_arrival_time.toString().padStart(4, 0).substring(0, 2)}:${plane.calculated_arrival_time.toString().padStart(4, 0).substring(2, 4)}<span class="text-muted">z</span> <i class="fas fa-plane text-primary"></i>`;
                             break;
                         case "Arriving":
-                        case "Taxy In":
+                        case "Taxi In":
                             iconString = `Arriving at Airport <i class="fas fa-plane-arrival text-primary"></i>`;
                             break;
                         case "Arrived":
@@ -355,42 +405,188 @@
 
                     let disabled = (!isAirborne) ? 'opacity:0.8;' : '';
                     let cardString = `  <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none; ${disabled}' >
-                                            <h5 style="float:right">${iconString}</h5>
-                                            <h5 class="card-title"><strong>${plane.callsign}</strong> <span class="text-dark">${plane.flight_plan.aircraft_faa}</span></h5>
-                                            <h6 class="card-subtitle text-danger"><sup class="text-muted">From </sup><strong>${plane.flight_plan.departure}</strong> <span class="text-muted">${plane.dep_airport_name}</span></h6>
-                                        </li>`
+                                                <h5 class="time-tag">${iconString}</h5>
+                                                <h5 class="card-title"><strong>${plane.callsign}</strong> <span class="text-dark">${plane.flight_plan.aircraft_faa}</span></h5>
+                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">From </sup><strong>${plane.flight_plan.departure}</strong> <span class="text-muted airport-name">${plane.dep_airport_name}</span></h6>
+                                            </li>`
                     $('#arrList').append(cardString);
                     $(`#id-${plane.callsign}`).fadeIn(300 + counter);
                 }
             });
-            
 
+            $('#filedDepList').fadeOut(800, () => {
+                $('#filedDepList').html('');
+                $('#filedDepList').show();
+                let counter = 0;
+                for (let plane of filedDepartures) {
+                    counter += 300;
+                    let iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i>`;
+                    let cardString = `  <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none;' >
+                                                <h5 class="time-tag">${iconString}</h5>
+                                                <h5 class="card-title"><strong>${plane.callsign}</strong> <span class="text-dark">${plane.flight_plan.aircraft_faa}</span></h5>
+                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">From </sup><strong>${plane.flight_plan.departure}</strong> <span class="text-muted"></span></h6>
+                                            </li>`
+                    $('#filedDepList').append(cardString);
+                    $(`#id-${plane.callsign}`).fadeIn(300 + counter);
+                }
+            });
 
-            console.log(arrivals);    
+            $('#filedArrList').fadeOut(800, () => {
+                $('#filedArrList').html('');
+                $('#filedArrList').show();
+                let counter = 0;
+                for (let plane of filedArrivals) {
+                    counter += 300;
+                    let iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}<span class="text-muted">z</span> <i class="far fa-clock text-primary"></i>`;
+                    let cardString = `  <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none;' >
+                                                <h5 class="time-tag">${iconString}</h5>
+                                                <h5 class="card-title"><strong>${plane.callsign}</strong> <span class="text-dark">${plane.flight_plan.aircraft_faa}</span></h5>
+                                                <h6 class="card-subtitle text-danger"><sup class="text-muted">From </sup><strong>${plane.flight_plan.departure}</strong> <span class="text-muted"></span></h6>
+                                            </li>`
+                    $('#filedArrList').append(cardString);
+                    $(`#id-${plane.callsign}`).fadeIn(300 + counter);
+                }
+            });
+            console.log(data);
         }
 
         function updateMetar(data) {
             console.log(data);
 
+            $('#rawMetar').html(data.RawMetar);
+            if (data.Pressure.ActualUnit === 9) {
+                $('#labelQnh').html(data.Pressure.ActualValue);
+                $('#labelAlt').html((data.Pressure.ActualValue * 0.0295301).toFixed(2));
+            } else {
+                $('#labelAlt').html(data.Pressure.ActualValue);
+                $('#labelQnh').html((data.Pressure.ActualValue * 33.864).toFixed(0));
+            }
+
+            if ($('#flewSwitchTemp').is(':checked')) {
+                $('#labelTemp').html(`${data.AirTemperature.ActualValue} °C`);
+                $('#labelDew').html(`${data.DewPointTemperature.ActualValue} °C`);
+            }
+            else {
+                $('#labelTemp').html(`${((data.AirTemperature.ActualValue * 9 / 5) + 32).toFixed(0)} °F`);
+                $('#labelDew').html(`${((data.DewPointTemperature.ActualValue * 9 / 5) + 32).toFixed(0)} °F`);
+            }
+
+            if (!data.Visibility)
+                $('#labelVisibility').html(">10000m");
+            else {
+                $('#labelVisibility').html(">10000m");
+            }
+
+            if (!data.SurfaceWind.VariableDirection) {
+                $('.wind-needle').fadeIn(500);
+                $('.wind-needle').css('transform', `translate(-4px) rotate(${data.SurfaceWind.MeanDirection.ActualValue}deg)`)
+                $('#windLabel').html(`${data.SurfaceWind.MeanDirection.ActualValue}° | ${data.SurfaceWind.MeanSpeed.ActualValue}kts`);
+            }
+            else {
+                $('.wind-needle').fadeOut(500);
+                $('#windLabel').html(`Variable | ${data.SurfaceWind.MeanSpeed.ActualValue}kts`);
+            }
+
+            if (data.SurfaceWind.DirectionVariations) {
+                $('.wind-needle-var, .wind-needle-var2, #windVariable').fadeIn(500);
+                $('.wind-needle-var').css('transform', `translate(-4px) rotate(${data.SurfaceWind.DirectionVariations[0].ActualValue}deg)`)
+                $('.wind-needle-var2').css('transform', `translate(-4px) rotate(${data.SurfaceWind.DirectionVariations[1].ActualValue}deg)`)
+                $('#windVariable').html(`${data.SurfaceWind.DirectionVariations[0].ActualValue}° - ${data.SurfaceWind.DirectionVariations[1].ActualValue}°`);
+            }
+            else {
+                $('.wind-needle-var, .wind-needle-var2, #windVariable').fadeOut(500);
+            }
+
+            if (data.SurfaceWind.SpeedVariations) {
+                $('#windGusting').fadeIn(500);
+                $('#windGusting').html(`Gusting ${data.SurfaceWind.SpeedVariations.ActualValue}kts`);
+            } else {
+                $('#windGusting').fadeOut(500);
+            }
+            var cloudString = '';
+            if (data.Clouds.length > 0) {
+                for (let cloud of data.Clouds) {
+                    let cloudType = getCloudType(cloud.Amount);
+                    cloudString += `<li class="list-group-item"><strong>${cloudType}</strong> ${cloud.BaseHeight.ActualValue}ft</li >`
+                }
+            }
+            else {
+                cloudString = data.Cavok ? 'Clouds and Visibility OK' : 'Clear';
+            }
+            $('#cloudList').html(cloudString);
+
+            //let pressureAlt = (29.92 - parseFloat($('#labelAlt').html())) * 1000 + globalAirportHeight;
+            //let ISA = (15 - ((globalAirportHeight / 1000) * 2));
+            //let densityAlt = pressureAlt + data.AirTemperature.ActualValue -
+
+            $('#lastUpdate').html(`Last Update: Day ${data.Day} - ${data.Time.replace('UTC', 'z')} for ${data.ICAO} ${data.Status}`);
         }
 
-        //function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-        //    var R = 6371; // Radius of the earth in km
-        //    var dLat = deg2rad(lat2 - lat1);  // deg2rad below
-        //    var dLon = deg2rad(lon2 - lon1);
-        //    var a =
-        //        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        //        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-        //        Math.sin(dLon / 2) * Math.sin(dLon / 2)
-        //        ;
-        //    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        //    var d = R * c; // Distance in km
-        //    return d;
-        //}
+        $('#loadIcao').click(() => {
+            clearTimeout(globalTick);
+            globalIcao = $('#icaoCode').val().toUpperCase();
+            localStorage.setItem('icao', globalIcao);
+            getDataFromServer();
+        });
 
-        //function deg2rad(deg) {
-        //    return deg * (Math.PI / 180)
-        //}
+        $('#flewSwitchTemp').change((e) => {
+            switchTempType($(e.target).is(':checked'));
+        });
+
+        $('#icaoCode').keypress(function (e) {
+            var key = e.which;
+            if (key == 13) {
+                $('#loadIcao').click();
+                return false;
+            }
+        });
+
+        function getCloudType(code) {
+            switch (code) {
+                case 0: return 'NULL'
+                    break;
+                case 1: return 'Few'
+                    break;
+                case 2: return 'Scattered'
+                    break;
+                case 3: return 'Broken'
+                    break;
+                case 4: return 'Overcast'
+                    break;
+                case 5: return 'VV'
+                    break;
+
+            }
+        }
+
+        function switchTempType(celsius) {
+            localStorage.setItem('temptype', celsius);
+            if (celsius) {
+                let newTemp = fToC(parseInt($('#labelTemp').html().replace(' °F', ''))).toFixed(0);
+                let newDew = fToC(parseInt($('#labelDew').html().replace(' °F', ''))).toFixed(0);
+                $('#labelTemp').html(`${newTemp} °C`);
+                $('#labelDew').html(`${newDew} °C`);
+            }
+            else {
+                let newTemp = cToF(parseInt($('#labelTemp').html().replace(' °C', ''))).toFixed(0);
+                let newDew = cToF(parseInt($('#labelDew').html().replace(' °C', ''))).toFixed(0);
+                $('#labelTemp').html(`${newTemp} °F`);
+                $('#labelDew').html(`${newDew} °F`);
+            }
+        }
+
+        function cToF(celsius) {
+            var cTemp = celsius;
+            var cToFahr = cTemp * 9 / 5 + 32;
+            return cToFahr;
+        }
+
+        function fToC(fahrenheit) {
+            var fTemp = fahrenheit;
+            var fToCel = (fTemp - 32) * 5 / 9;
+            return fToCel;
+        }
+
     </script>
 </body>
 </html>
