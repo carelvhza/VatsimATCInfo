@@ -13,6 +13,8 @@ using System.IO;
 using System.Device;
 using System.Device.Location;
 using System.Web.Hosting;
+using VatsimATCInfo.Helpers;
+using static VatsimATCInfo.Helpers.MainEnums;
 
 namespace VatsimATCInfo
 {
@@ -23,51 +25,33 @@ namespace VatsimATCInfo
     public class vatsim : WebService
     {
 
+        /// <summary>
+        /// Returns base data used in front end
+        /// </summary>
+        /// <param name="icao">4 letter ICAO code</param>
+        /// <returns></returns>
         [WebMethod]
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public VatsimData GetData(string icao)
         {
-            var client = new RestClient("https://data.vatsim.net/");
-            var request = new RestRequest("v3/vatsim-data.json", DataFormat.Json);
-            var response = client.Get(request);
-            var val = JsonConvert.DeserializeObject<VatsimData>(response.Content);
-
-            var mainFile = File.ReadAllLines(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "airports.dat"));
-            var airportData = new List<AirportData>();
-            var c = 0;
-            foreach (var item in mainFile)
+            icao = icao.ToUpper();     
+            var vatsimData = Communication.DoCall<VatsimData>(DataCalls.VatsimData, icao);
+            var airportData = _getAirports();            
+            var currentAirport = airportData.FirstOrDefault(air => air.ICAO == icao);
+            if (currentAirport == null)
             {
-                c++;
-                var split = item.Split(',');
-                if (split.Length == 14)
-                {
-                    airportData.Add(new AirportData()
-                    {
-                        Id = int.Parse(split[0]),
-                        Name = split[1],
-                        ShortName = split[2],
-                        Country = split[3],
-                        IATA = split[4],
-                        ICAO = split[5],
-                        Latitude = double.Parse(split[6]),
-                        Longitude = double.Parse(split[7]),
-                        Altitude = int.Parse(split[8])
-                    });
-                }
+                return null;
             }
 
-            val.current_airport_name = airportData.FirstOrDefault(air => air.ICAO == icao)?.Name;
-            if (val.current_airport_name != null)
-            {
-                val.airport_height = airportData.FirstOrDefault(air => air.ICAO == icao).Altitude;
-            }
 
-            val.pilots = val.pilots.Where(pi => pi.flight_plan != null && (pi.flight_plan?.arrival == icao || pi.flight_plan?.departure == icao)).ToList();
+            vatsimData.current_airport_name = currentAirport.Name;            
+            vatsimData.airport_height = currentAirport.Altitude;
+            vatsimData.pilots = vatsimData.pilots.Where(pi => pi.flight_plan != null && (pi.flight_plan?.arrival == icao || pi.flight_plan?.departure == icao)).OrderBy(pi2 => pi2.callsign).ToList();
 
-            foreach (var pilot in val.pilots.Where(a => a.flight_plan != null))
+            foreach (var pilot in vatsimData.pilots.Where(a => a.flight_plan != null))
             {
-                var depAirport = airportData.FirstOrDefault(ap => ap.ICAO == pilot.flight_plan.departure);
-                var arrAirport = airportData.FirstOrDefault(ap => ap.ICAO == pilot.flight_plan.arrival);
+                var depAirport = airportData.FirstOrDefault(arp => arp.ICAO == pilot.flight_plan.departure);
+                var arrAirport = airportData.FirstOrDefault(arp => arp.ICAO == pilot.flight_plan.arrival);
 
                 if (depAirport != null && arrAirport != null)
                 {
@@ -141,8 +125,25 @@ namespace VatsimATCInfo
                 }
             }
 
+            var ap = airportData.FirstOrDefault(air => air.ICAO == icao);
+            var transceivers = _getTransceivers();
+            if (ap != null)
+            {
+                var airportCoords = new GeoCoordinate(ap.Latitude, ap.Longitude);
 
-            return val;
+                foreach (var controller in vatsimData.controllers)
+                {
+                    var tr = transceivers.FirstOrDefault(tra => tra.callsign == controller.callsign);
+                    if (tr != null && tr?.transceivers != null && tr.transceivers.Any()) 
+                    {
+                        var atcCoords = new GeoCoordinate(tr.transceivers[0].latDeg, tr.transceivers[0].lonDeg);
+                        controller.distance_from_airport = airportCoords.GetDistanceTo(atcCoords);
+                    }
+                }
+
+                vatsimData.controllers = vatsimData.controllers.Where(a => a.distance_from_airport < 200000 && a.distance_from_airport != 0).OrderBy(a2 => a2.callsign).ToList();
+            }
+            return vatsimData;
         }
 
         [WebMethod]
@@ -152,8 +153,51 @@ namespace VatsimATCInfo
             var client = new RestClient("https://metar.vatsim.net/");
             var request = new RestRequest($"metar.php?id={icao}", DataFormat.Json);
             var response = client.Get(request);
+            if (response.Content == "")
+            {
+                return null;
+            }
             var metar = MetarDecoder.ParseWithMode(response.Content);
             return metar;
+        }     
+        
+        private List<RadioSource> _getTransceivers()
+        {
+            var client = new RestClient("https://data.vatsim.net/");
+            var request = new RestRequest("v3/transceivers-data.json", DataFormat.Json);
+            var response = client.Get(request);
+
+            var transceivers = JsonConvert.DeserializeObject<List<RadioSource>>(response.Content);
+
+            return transceivers;
+        }
+
+        private List<AirportData> _getAirports()
+        {
+            var mainFile = File.ReadAllLines(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "airports.dat"));
+            var airportData = new List<AirportData>();
+            var c = 0;
+            foreach (var item in mainFile)
+            {
+                c++;
+                var split = item.Split(',');
+                if (split.Length == 14)
+                {
+                    airportData.Add(new AirportData()
+                    {
+                        Id = int.Parse(split[0]),
+                        Name = split[1],
+                        ShortName = split[2],
+                        Country = split[3],
+                        IATA = split[4],
+                        ICAO = split[5],
+                        Latitude = double.Parse(split[6]),
+                        Longitude = double.Parse(split[7]),
+                        Altitude = int.Parse(split[8])
+                    });
+                }
+            }
+            return airportData;
         }
     }
 }

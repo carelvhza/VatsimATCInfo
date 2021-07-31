@@ -74,6 +74,7 @@ namespace VatsimATCInfo.Models
         public List<string> text_atis { get; set; }
         public DateTime last_updated { get; set; }
         public DateTime logon_time { get; set; }
+        public double distance_from_airport { get; set; }        
     }
 
     public class Ati
