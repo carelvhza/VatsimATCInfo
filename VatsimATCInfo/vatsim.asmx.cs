@@ -125,6 +125,9 @@ namespace VatsimATCInfo
                 }
             }
 
+            vatsimData.pilots = vatsimData.pilots.OrderBy(pi2 => pi2.calculated_arrival_time).ToList();
+
+
             var ap = airportData.FirstOrDefault(air => air.ICAO == icao);
             var transceivers = _getTransceivers();
             if (ap != null)

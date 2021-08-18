@@ -32,6 +32,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -84,6 +85,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="css\all.min.css" />
+    <Content Include="css\flatly.css" />
+    <Content Include="css\override.css" />
     <Content Include="css\theme_light.css" />
     <Content Include="Global.asax" />
     <Content Include="images\compass_vector.jpg" />
@@ -103,7 +106,6 @@
     <Compile Include="Models\AirportData.cs" />
     <Compile Include="Models\AtcData.cs" />
     <Compile Include="Models\VatsimData.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="vatsim.asmx.cs">
       <DependentUpon>vatsim.asmx</DependentUpon>
       <SubType>Component</SubType>
@@ -121,6 +123,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Controllers\" />
+    <Folder Include="Properties\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
