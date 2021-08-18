@@ -66,39 +66,48 @@ namespace VatsimATCInfo
                     distance = planeCoord.GetDistanceTo(airportCoord);
                     pilot.distance_to_arr = distance;
                     pilot.arr_airport_name = arrAirport.Name;
+                    var flightType = (pilot.flight_plan.arrival == icao) ? 2 : (pilot.flight_plan.departure == icao) ? 1 : 0;
 
                     if (pilot.distance_from_dep > 6000 && pilot.distance_to_arr > 6000 && pilot.groundspeed > 40)
                     {
                         pilot.status = "Airborne";
+                        pilot.sort_order = 3;
                     }
                     else if (pilot.distance_from_dep <= 6000 && pilot.altitude <= depAirport.Altitude + 10 && pilot.groundspeed > 0 && pilot.groundspeed < 40)
                     {
                         pilot.status = "Taxi Out";
+                        pilot.sort_order = (flightType == 1) ? 1 : 5;
                     }
                     else if (pilot.distance_from_dep <= 6000 && pilot.altitude > depAirport.Altitude + 10 && pilot.groundspeed > 40)
                     {
                         pilot.status = "Departing";
+                        pilot.sort_order = (flightType == 1) ? 2 : 4;
                     }
                     else if (pilot.distance_to_arr <= 55500 && pilot.groundspeed > 40 && pilot.altitude > arrAirport.Altitude + 10)
                     {
                         pilot.status = "Arriving";
+                        pilot.sort_order = (flightType == 1) ? 4 : 2;
                     }
                     else if (pilot.distance_to_arr <= 6000 && pilot.altitude <= arrAirport.Altitude + 10 && pilot.groundspeed < 40 && pilot.groundspeed != 0)
                     {
                         pilot.status = "Taxi In";
+                        pilot.sort_order = (flightType == 1) ? 5 : 1;
                     }
                     else if (pilot.distance_to_arr <= 6000 && pilot.altitude <= arrAirport.Altitude + 10 && pilot.groundspeed == 0)
                     {
                         pilot.status = "Arrived";
+                        pilot.sort_order = (flightType == 1) ? 6 : 0;
                     }
                     else
                     {
                         pilot.status = "Preparing";
+                        pilot.sort_order = (flightType == 1) ? 0 : 6;
                     }
 
                     if (pilot.distance_to_arr <= 55500 && pilot.groundspeed > 40 && pilot.altitude > arrAirport.Altitude + 10)
                     {
                         pilot.status = "Arriving";
+                        pilot.sort_order = (flightType == 1) ? 4 : 2;
                     }
 
                     if (pilot.groundspeed > 0)
@@ -125,7 +134,12 @@ namespace VatsimATCInfo
                 }
             }
 
-            vatsimData.pilots = vatsimData.pilots.OrderBy(pi2 => pi2.calculated_arrival_time).ToList();
+            
+            vatsimData.departures = vatsimData.pilots.Where(pi => pi.flight_plan != null && pi.flight_plan.departure == icao).ToList();
+            vatsimData.departures = vatsimData.departures.OrderBy(pi => pi.sort_order).ThenBy(pi2 => pi2.flight_plan.deptime).ThenBy(pi3 => pi3.calculated_arrival_time).ToList();
+            
+            vatsimData.arrivals = vatsimData.pilots.Where(pi => pi.flight_plan != null && pi.flight_plan.arrival == icao).ToList();
+            vatsimData.arrivals = vatsimData.arrivals.OrderBy(pi => pi.sort_order).ThenBy(pi2 => pi2.calculated_arrival_time).ThenBy(pi3 => pi3.flight_plan.deptime).ToList();
 
 
             var ap = airportData.FirstOrDefault(air => air.ICAO == icao);

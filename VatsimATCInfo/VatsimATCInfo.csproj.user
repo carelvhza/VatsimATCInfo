@@ -8,7 +8,7 @@
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
-    <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
+    <LastActiveSolutionConfig>Release|Any CPU</LastActiveSolutionConfig>
     <NameOfLastUsedPublishProfile>H:\Projects\Coding\VatsimATCInfo\VatsimATCInfo\Properties\PublishProfiles\FolderProfile.pubxml</NameOfLastUsedPublishProfile>
     <ProjectView>ShowAllFiles</ProjectView>
   </PropertyGroup>

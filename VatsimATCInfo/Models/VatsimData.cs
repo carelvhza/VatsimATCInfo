@@ -52,6 +52,8 @@ namespace VatsimATCInfo.Models
         public FlightPlan flight_plan { get; set; }
         public DateTime logon_time { get; set; }
         public DateTime last_updated { get; set; }
+        public int sort_order { get; set; }
+        public bool is_departure { get; set; }
 
         public string dep_airport_name { get; set; }
         public string arr_airport_name { get; set; }
@@ -136,6 +138,8 @@ namespace VatsimATCInfo.Models
     {
         public General general { get; set; }
         public List<Pilot> pilots { get; set; }
+        public List<Pilot> departures { get; set; }
+        public List<Pilot> arrivals { get; set; }
         public List<Controller> controllers { get; set; }
         public List<Ati> atis { get; set; }
         public List<Server> servers { get; set; }
