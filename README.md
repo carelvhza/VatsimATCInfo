@@ -1,6 +1,7 @@
 # VatsimATCInfo
 
 A website that displays useful information for a Vatsim controller.
+It is hosted here: https://sky-net.co.za/vatsimairportinfo/
 
 ## Usage
 ![image](https://user-images.githubusercontent.com/20255491/129849132-762c3d43-04df-48d7-85f1-a848a26042a7.png)
