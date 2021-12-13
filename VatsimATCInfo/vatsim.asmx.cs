@@ -24,7 +24,6 @@ namespace VatsimATCInfo
     [System.Web.Script.Services.ScriptService]
     public class vatsim : WebService
     {
-
         /// <summary>
         /// Returns base data used in front end
         /// </summary>
@@ -36,16 +35,18 @@ namespace VatsimATCInfo
         {
             icao = icao.ToUpper();     
             var vatsimData = Communication.DoCall<VatsimData>(DataCalls.VatsimData, icao);
-            var airportData = _getAirports();            
+            var airportData = DataStore.GetAirports();            
             var currentAirport = airportData.FirstOrDefault(air => air.ICAO == icao);
             if (currentAirport == null)
             {
                 return null;
-            }
+            }            
 
-
-            vatsimData.current_airport_name = currentAirport.Name;            
+            vatsimData.current_airport_name = currentAirport.Name;
+            vatsimData.current_airport_shortname = currentAirport.ShortName;
+            vatsimData.current_airport_country = currentAirport.Country;
             vatsimData.airport_height = currentAirport.Altitude;
+            vatsimData.current_airport_runways = currentAirport.Runways;
             vatsimData.pilots = vatsimData.pilots.Where(pi => pi.flight_plan != null && (pi.flight_plan?.arrival == icao || pi.flight_plan?.departure == icao)).OrderBy(pi2 => pi2.callsign).ToList();
 
             foreach (var pilot in vatsimData.pilots.Where(a => a.flight_plan != null))
@@ -61,11 +62,15 @@ namespace VatsimATCInfo
                     var distance = planeCoord.GetDistanceTo(airportCoord);
                     pilot.distance_from_dep = distance;
                     pilot.dep_airport_name = depAirport.Name;
+                    pilot.dep_airport_shortname = depAirport.ShortName;
+                    pilot.dep_airport_country = depAirport.Country; 
 
                     airportCoord = new GeoCoordinate(arrAirport.Latitude, arrAirport.Longitude);
                     distance = planeCoord.GetDistanceTo(airportCoord);
                     pilot.distance_to_arr = distance;
                     pilot.arr_airport_name = arrAirport.Name;
+                    pilot.arr_airport_shortname = arrAirport.ShortName;
+                    pilot.arr_airport_country = arrAirport.Country;
                     var flightType = (pilot.flight_plan.arrival == icao) ? 2 : (pilot.flight_plan.departure == icao) ? 1 : 0;
 
                     if (pilot.distance_from_dep > 6000 && pilot.distance_to_arr > 6000 && pilot.groundspeed > 40)
@@ -189,32 +194,6 @@ namespace VatsimATCInfo
             return transceivers;
         }
 
-        private List<AirportData> _getAirports()
-        {
-            var mainFile = File.ReadAllLines(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "airports.dat"));
-            var airportData = new List<AirportData>();
-            var c = 0;
-            foreach (var item in mainFile)
-            {
-                c++;
-                var split = item.Split(',');
-                if (split.Length == 14)
-                {
-                    airportData.Add(new AirportData()
-                    {
-                        Id = int.Parse(split[0]),
-                        Name = split[1],
-                        ShortName = split[2],
-                        Country = split[3],
-                        IATA = split[4],
-                        ICAO = split[5],
-                        Latitude = double.Parse(split[6]),
-                        Longitude = double.Parse(split[7]),
-                        Altitude = int.Parse(split[8])
-                    });
-                }
-            }
-            return airportData;
-        }
     }
+
 }

@@ -56,6 +56,7 @@
     box-shadow: rgba(0,0,0,0.3) 5px 5px 5px 5px;
     border-radius: 3px;
     border: solid rgba(0,0,0,0.3) 0.3px;
+    z-index:10;
   }
 
   .wind-needle, .wind-needle-var, .wind-needle-var2 {
@@ -67,7 +68,33 @@
     right: 0;
     margin: auto;
     transform: translate(-4px);
-    transition: transform ease-in-out 2s
+    transition: transform ease-in-out 2s;
+    z-index:5;
+  }
+
+  .runway-one {
+    position: absolute;
+    width: 70%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    transform: translate(0px);
+    transition: transform ease-in-out 2s;
+    height: 280px;
+    width: 70px;
+  }
+
+  .slider-runway-one{
+    /*position:absolute;
+    bottom:0;*/
+    right:0;
+    left:0;
+    margin-left:auto;
+    margin-right:auto;    
+    text-align:center;
+    width:100%;
   }
 
   .wind-needle-var, .wind-needle-var2 {
@@ -106,194 +133,296 @@
     width: 85px;
   }
 
+  .text-scale {
+    padding: 4px;
+    margin-right: 1rem;
+    font-size:1.2rem;
+    color: rgba(255,255,255,0.3)
+  }
+
+  .modal-backdrop {
+    zoom: 1.5;
+  }
+
+  .fix-switches {
+    margin-left: 20px;
+  }
+
+  .one-third {
+    min-width: 66%;
+  }
+
+  #sliderRwyOne {
+    width:80%;
+  }
+
   .tooltip.show {
     /*inset: inherit !important; */
   }
 </style>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-primary bg-primary">
-    <div class="container-fluid">
-      <a class="navbar-brand text-light" href="#" style="opacity:0.9">Vatsim Airport Info</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor03" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarColor03">
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item">
-            <i class="fas fa-map-marker text-white" style="display: inline; font-size: 1rem;"></i><span id="icaoLabel" class="nav-link text-white" href="#" style="font-size: 1rem; display:inline;"></span>
-          </li>
-          <li class="nav-item">
-            <span id="airportName" class="text-white"></span>
-          </li>
-        </ul>
-        <div class="d-flex fix-top">
-          <input id="icaoCode" class="form-control me-sm-2 icao-search" type="text" placeholder="ICAO">
-          <button id="loadIcao" class="btn btn-secondary my-2 my-sm-0">Load</button>
+  <div id="body-global">
+    <nav class="navbar navbar-expand-lg navbar-primary bg-primary">
+      <div class="container-fluid">
+        <a class="navbar-brand text-light" href="#" style="opacity:0.9">Vatsim Airport Info</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor03" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarColor03">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <i class="fas fa-map-marker text-white" style="display: inline; font-size: 1rem;"></i><span id="icaoLabel" class="nav-link text-white" href="#" style="font-size: 1rem; display:inline;"></span>
+            </li>
+            <li class="nav-item">
+              <span id="airportName" class="text-white"></span>
+            </li>
+          </ul>
+          <div class="d-flex fix-top">
+            <input id="icaoCode" class="form-control me-sm-2 icao-search" type="text" placeholder="ICAO">
+            <button id="loadIcao" class="btn btn-secondary my-2 my-sm-0">Load</button>
+            <button id="buttonSettings" class="btn btn-sm btn-dark my-2 my-sm-0 ml-2" data-bs-toggle="modal" data-bs-target="#modalSettings">
+              <i class="fas fa-cog text-white" style="display: inline; font-size: 1rem;"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div class="progress progress-bar-loader">
+      <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%;"></div>
+    </div>
+    <div class="container">
+      <div class="row" style="margin-top:20px;">
+        <!-- Left Col -->
+        <div id="windowLeftSide" class="col one-third">
+          <div id="windowatis" class="row">
+            <div class="col">
+              <div class="card text-black bg-secondary mb-3" style="max-width: 100%;">
+                <div class="card-body" style="padding:1px;">
+                  <div class="row atis-information">
+                    <div class="col-sm-1" style="position: relative; text-align: center; margin-top: auto; margin-bottom: auto;">
+                      <strong class="information" id="information"></strong>
+                    </div>
+                    <div class="col-lg-11">
+                      <span class="card-text" id="atisText" style="font-size: small;"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div id="windowatc" class="col">
+              <div class="card text-white bg-info mb-3" style="max-width: 100%;">
+                <div class="card-header">Aerodrome ATC</div>
+                <div id="atcList" class="card-body" style="font-size: smaller;">
+                </div>
+              </div>
+            </div>
+            <div id="windownearby" class="col">
+              <div class="card text-white bg-info mb-3" style="max-width: 100%;">
+                <div class="card-header">Nearby ATC and Observers</div>
+                <div id="atcClosebyList" class="card-body" style="font-size: smaller;">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-6">
+              <div id="windowfiledDeps" class="row">
+                <div class="col-lg-12">
+                  <div class="card text-black bg-light mb-3" style="max-width: 100%;">
+                    <div class="card-header">Filed Departures</div>
+                    <div id="filedDepList" class="card-body">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="windowdeps" class="row">
+                <div class="col-lg-12">
+                  <div class="card text-white bg-success mb-3" style="max-width: 100%;">
+                    <div class="card-header">
+                      Departures
+                      <span style="float:right">
+                        <span class="form-check form-switch" style="margin-right: 90px; border-radius: 5px; background: rgba(255,255,255,0.3); padding-left: 40px;">
+                          <label class="form-check-label temp-label-c" for="switchDepsOff" style="width: 100px;">Hide Departed</label>
+                          <input class="form-check-input" type="checkbox" id="switchDepsOff">
+                        </span>
+                      </span>
+                    </div>
+                    <div class="card-body">
+                      <ul id="depList" class="list-group list-group-flush">
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div id="windowfiledArrs" class="row">
+                <div class="col-lg-12">
+                  <div class="card text-black bg-light mb-3" style="max-width: 100%;">
+                    <div class="card-header">Filed Arrivals</div>
+                    <div id="filedArrList" class="card-body">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="windowarrs" class="row">
+                <div class="col-lg-12">
+                  <div class="card text-white bg-danger mb-3" style="max-width: 100%;">
+                    <div class="card-header">Arrivals</div>
+                    <div class="card-body">
+                      <ul id="arrList" class="list-group list-group-flush">
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4">
+              <div class="row">
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <!-- Right col -->
+        <div id="windowweather" class="col">
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="card mb-3 ">
+                <span class="card-header text-white bg-primary">
+                  <span style="font-size:larger">Weather</span>
+                  <span style="float:right">
+                    <span class="form-check form-switch" style="margin-right: 25px; border-radius: 5px; background: rgba(255,255,255,0.3); padding-left: 46px;">
+                      <label class="form-check-label temp-label-f" for="flewSwitchTemp">°F</label>
+                      <label class="form-check-label temp-label-c" for="flewSwitchTemp"> °C</label>
+                      <input class="form-check-input" type="checkbox" id="flewSwitchTemp" style="right: 8px;" checked>
+                    </span>
+                  </span>
+                </span>
+                <div class="progress progress-bar-loader2">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%;"></div>
+                </div>
+                <div class="card-body">
+                  <h5 class="card-title" style="font-size:1rem; margin-bottom:0.4rem">METAR</h5>
+                  <h6 id="rawMetar" class="card-subtitle text-muted">Waiting for METAR...</h6>
+                </div>
+                <div class="slider-runway-one">
+                  <span class="text-success" style="display:block">RWY <span id="labelRunwayDirection"> 1</span></span>
+                  <input type="range" min="10" max="360" step="10" value="10" class="slider mb-2 form-range " id="sliderRwyOne">
+                </div>
+                <div style="text-align:center; position:relative">
+                  <div class="wind-text">
+                    <h5 class="text-primary"><strong id="windLabel"></strong></h5>
+                    <h5 class="text-danger"><strong id="windVariable"></strong></h5>
+                    <h5 class="text-warning"><strong id="windGusting"></strong></h5>
+                  </div>
+                  <img src="images/compass_vector_2.png" style="width:90%; opacity: 0.6;" />
+                  <img src="images/windneedle.png" class="wind-needle" />
+                  <img src="images/windneedle_var.png" class="wind-needle-var" />
+                  <img src="images/windneedle_var.png" class="wind-needle-var2" />
+                  <img src="images/runway-3.png" class="runway-one" />
+                  <!--<img src="images/runway-3.png" class="runway-two" />-->
+                </div>
+                <div class="card-body">
+                  <div class="row" style="font-size:1rem; text-align: center;">
+                    <div class="col">
+                      <span class="card-text"><sup>QNH</sup> <strong id="labelQnh">-</strong> | <sup>ALT</sup> <strong id="labelAlt">-</strong></span>
+                    </div>
+                    <div class="col">
+                      <span class="card-text"><sup>Temp </sup><strong id="labelTemp"></strong> | <sup>Dew</sup> <strong id="labelDew">-</strong></span>
+                    </div>
+                  </div>
+                  <hr />
+                  <div class="row">
+                    <div class="col-md-12" style=" font-size:1rem;">
+                      <span class="card-text"><sup>Visibility</sup> <strong id="labelVisibility"></strong></span>
+                    </div>
+                  </div>
+                  <hr />
+                </div>
+
+                <div class="card-body">
+                  <h5 class="text-primary">Clouds</h5>
+                  <ul id="cloudList" class="list-group list-group-flush" style="font-size:1rem;">
+                  </ul>
+                </div>
+                <div class="card-footer text-muted" id="lastUpdate">
+                  Waiting for update...
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </nav>
-  <div class="progress progress-bar-loader">
-    <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%;"></div>
   </div>
-  <div class="container">
-    <div class="row" style="margin-top:20px;">
-      <!-- Left Col -->
-      <div class="col-lg-8">
-        <div class="row">
-          <div class="col">
-            <div class="card text-black bg-secondary mb-3" style="max-width: 100%;">
-              <div class="card-body" style="padding:1px;">
-                <div class="row atis-information">
-                  <div class="col-sm-1" style="position: relative; text-align: center; margin-top: auto; margin-bottom: auto;">
-                    <strong class="information" id="information"></strong>
-                  </div>
-                  <div class="col-lg-11">
-                    <span class="card-text" id="atisText" style="font-size: small;"></span>
-                  </div>
-                </div>
+  <!-- Modal -->
+  <div class="modal fade" id="modalSettings" tabindex="-1" aria-labelledby="modalSettings" aria-hidden="true" style="zoom: inherit">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalSettingsLabel">Settings</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <fieldset>
+              <legend class="mt-4">Options</legend>
+              <label class="form-label" for="">Scale</label>
+              <div class="form-input">
+                <button id="buttonIncreaseZoom" class="btn btn-sm btn-dark my-2 my-sm-0 ml-1">
+                  <i class="fas fa-plus text-white" style="display: inline; font-size: 1rem;"></i>
+                </button>
+                <button id="buttonDecreaseZoom" class="btn btn-sm btn-dark my-2 my-sm-0 ml-1">
+                  <i class="fas fa-minus text-white" style="display: inline; font-size: 1rem;"></i>
+                </button>
+                <span class="text-success"><span id="labelScale"></span>%</span>
               </div>
-            </div>
+            </fieldset>
+          </div>
+          <div class="form-group">
+            <legend class="mt-4">Panels</legend>
+            <fieldset class="fix-switches">
+              <div class="form-check form-switch">
+                <input class="form-check-input window-switches" type="checkbox" id="switchAtis" data-window="atis">
+                <label class="form-check-label" for="switchAtis">ATIS</label>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input window-switches" type="checkbox" id="switchATC" data-window="atc">
+                <label class="form-check-label" for="switchATC">Aerodrome ATC</label>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input window-switches" type="checkbox" id="switchNearby" data-window="nearby">
+                <label class="form-check-label" for="switchNearby">Nearby ATC</label>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input window-switches" type="checkbox" id="switchFiledDeps" data-window="filedDeps">
+                <label class="form-check-label" for="switchFiledDeps">Filed Departures</label>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input window-switches" type="checkbox" id="switchFiledArrs" data-window="filedArrs">
+                <label class="form-check-label" for="switchFiledArrs">Filed Arrivals</label>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input window-switches" type="checkbox" id="switchDeps" data-window="deps">
+                <label class="form-check-label" for="switchDeps">Departures</label>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input window-switches" type="checkbox" id="switchArrs" data-window="arrs">
+                <label class="form-check-label" for="switchArrs">Arrivals</label>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input window-switches" type="checkbox" id="switchWeather" data-window="weather">
+                <label class="form-check-label" for="switchWeather">Weather</label>
+              </div>
+            </fieldset>
           </div>
         </div>
-        <div class="row">
-          <div class="col">
-            <div class="card text-white bg-info mb-3" style="max-width: 100%;">
-              <div class="card-header">Aerodrome ATC</div>
-              <div id="atcList" class="card-body" style="font-size: smaller;">
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="card text-white bg-info mb-3" style="max-width: 100%;">
-              <div class="card-header">Nearby ATC and Observers</div>
-              <div id="atcClosebyList" class="card-body" style="font-size: smaller;">
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-lg-6">
-            <div class="row">
-              <div class="col-lg-12">
-                <div class="card text-black bg-light mb-3" style="max-width: 100%;">
-                  <div class="card-header">Filed Departures</div>
-                  <div id="filedDepList" class="card-body">
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-lg-12">
-                <div class="card text-white bg-success mb-3" style="max-width: 100%;">
-                  <div class="card-header">
-                    Departures
-                    <span style="float:right">
-                      <span class="form-check form-switch" style="margin-right: 90px; border-radius: 5px; background: rgba(255,255,255,0.3); padding-left: 40px;">
-                        <label class="form-check-label temp-label-c" for="switchDeps" style="width: 100px;">Hide Departed</label>
-                        <input class="form-check-input" type="checkbox" id="switchDeps">
-                      </span>
-                    </span>
-                  </div>
-                  <div class="card-body">
-                    <ul id="depList" class="list-group list-group-flush">
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="row">
-              <div class="col-lg-12">
-                <div class="card text-black bg-light mb-3" style="max-width: 100%;">
-                  <div class="card-header">Filed Arrivals</div>
-                  <div id="filedArrList" class="card-body">
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-lg-12">
-                <div class="card text-white bg-danger mb-3" style="max-width: 100%;">
-                  <div class="card-header">Arrivals</div>
-                  <div class="card-body">
-                    <ul id="arrList" class="list-group list-group-flush">
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4">
-            <div class="row">
-
-            </div>
-          </div>
-
-        </div>
-      </div>
-      <!-- Right col -->
-      <div class="col-lg-4">
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="card mb-3 ">
-              <span class="card-header text-white bg-primary">
-                <span style="font-size:larger">Weather</span>
-                <span style="float:right">
-                  <span class="form-check form-switch" style="margin-right: 25px; border-radius: 5px; background: rgba(255,255,255,0.3); padding-left: 46px;">
-                    <label class="form-check-label temp-label-f" for="flewSwitchTemp">°F</label>
-                    <label class="form-check-label temp-label-c" for="flewSwitchTemp"> °C</label>
-                    <input class="form-check-input" type="checkbox" id="flewSwitchTemp" style="right: 8px;" checked>
-                  </span>
-                </span>
-              </span>
-              <div class="progress progress-bar-loader2">
-                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%;"></div>
-              </div>
-              <div class="card-body">
-                <h5 class="card-title" style="font-size:1rem; margin-bottom:0.4rem">METAR</h5>
-                <h6 id="rawMetar" class="card-subtitle text-muted">Waiting for METAR...</h6>
-              </div>
-              <div style="text-align:center; position:relative">
-                <div class="wind-text">
-                  <h5 class="text-primary"><strong id="windLabel"></strong></h5>
-                  <h5 class="text-danger"><strong id="windVariable"></strong></h5>
-                  <h5 class="text-warning"><strong id="windGusting"></strong></h5>
-                </div>
-                <img src="images/compass_vector.png" style="width:90%" />
-                <img src="images/windneedle.png" class="wind-needle" />
-                <img src="images/windneedle_var.png" class="wind-needle-var" />
-                <img src="images/windneedle_var.png" class="wind-needle-var2" />
-              </div>
-              <div class="card-body">
-                <div class="row" style="font-size:1rem; text-align: center;">
-                  <div class="col">
-                    <span class="card-text"><sup>QNH</sup> <strong id="labelQnh">-</strong> | <sup>ALT</sup> <strong id="labelAlt">-</strong></span>
-                  </div>
-                  <div class="col">
-                    <span class="card-text"><sup>Temp </sup><strong id="labelTemp"></strong> | <sup>Dew</sup> <strong id="labelDew">-</strong></span>
-                  </div>
-                </div>
-                <hr />
-                <div class="row">
-                  <div class="col-md-12" style=" font-size:1rem;">
-                    <span class="card-text"><sup>Visibility</sup> <strong id="labelVisibility"></strong></span>
-                  </div>
-                </div>
-                <hr />
-              </div>
-
-              <div class="card-body">
-                <h5 class="text-primary">Clouds</h5>
-                <ul id="cloudList" class="list-group list-group-flush" style="font-size:1rem;">
-                </ul>
-              </div>
-              <div class="card-footer text-muted" id="lastUpdate">
-                Waiting for update...
-              </div>
-            </div>
-          </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
@@ -305,11 +434,12 @@
     var globalIcao = localStorage.getItem('icao');
     var globalAirportHeight = 5558;
     var url = window.location.host;
-    var uri = `https://${window.location.host}${window.location.pathname}/vatsim.asmx`;
+    var uri = `https://${window.location.host}/vatsim.asmx`;
     var globalTick;
     var globalData;
+    var globalZoom = 1.0;    
 
-    $(() => {    
+    $(() => {
       if (!globalIcao || globalIcao === '') {
         globalIcao = 'FAOR';
       }
@@ -320,7 +450,15 @@
       $('#flewSwitchTemp').prop('checked', (current == 'true'));
 
       let hideDeps = localStorage.getItem('hideDeps');
-      $('#switchDeps').prop('checked', (hideDeps == 'true'));
+      $('#switchDepsOff').prop('checked', (hideDeps == 'true'));
+      globalZoom = localStorage.getItem('globalZoom');
+      if (!globalZoom || isNaN(globalZoom)) {
+        globalZoom = 1.0;
+      }
+      $('#body-global').css('zoom', globalZoom);
+      $('#labelScale').html(Math.round(globalZoom * 100));
+
+      setWindows();
 
       getDataFromServer();
     });
@@ -368,7 +506,7 @@
         return;
       }
       $('#icaoLabel').html(globalIcao);
-      $('#airportName').html(data.current_airport_name);
+      $('#airportName').html(`${data.current_airport_shortname} (${data.current_airport_name})`);
       globalAirportHeight = data.airport_height;
 
       // Filter out empty flight plans
@@ -396,6 +534,8 @@
       updateFiledData(filedDepartures, filedArrivals);
       updateAtcData(aerodromeATC, otherATC)
       updateAtis(data.atis.filter(a => a.callsign.includes(globalIcao)));
+      updateRunwayData(data.current_runways);
+
 
       console.log(data);
     }
@@ -412,8 +552,8 @@
       switchTempType($(e.target).is(':checked'));
     });
 
-    $('#switchDeps').change((e) => {
-      updateDepartures(globalData);
+    $('#switchDepsOff').change((e) => {
+      updateDepartures(globalData.departures);
       localStorage.setItem('hideDeps', $(e.target).is(':checked'));
     });
 
@@ -425,7 +565,172 @@
       }
     });
 
+    $('#buttonIncreaseZoom').click(() => {
+      globalZoom += 0.1;
+      if (globalZoom > 1.7) {
+        globalZoom = 1.7;
+      }
+      $('#body-global').css('zoom', globalZoom);
+      localStorage.setItem('globalZoom', globalZoom);
+      $('#labelScale').html(Math.round(globalZoom * 100));
+    });
+
+    $('#buttonDecreaseZoom').click(() => {
+
+      globalZoom -= 0.1;
+      if (globalZoom < 0.5) {
+        globalZoom = 0.5;
+      }
+      $('#body-global').css('zoom', globalZoom);
+      localStorage.setItem('globalZoom', globalZoom);
+      $('#labelScale').html(Math.round(globalZoom * 100));
+    });
+
+    $('.window-switches').click((e) => {
+      let windowSettings = getWindowSettings();
+      let targetWindow = $(e.target).attr('data-window');
+      let isChecked = $(e.target).is(':checked');
+      eval(`windowSettings.${targetWindow} = isChecked ? true : false`);
+      if (isChecked) {
+        eval(`$('#window${targetWindow}').show();`)
+      }
+      else {
+        eval(`$('#window${targetWindow}').hide();`)
+      }
+      setWindowSettings(windowSettings);
+
+      if (
+        !windowSettings.atis
+        && !windowSettings.nearby
+        && !windowSettings.filedDeps
+        && !windowSettings.filedArrs
+        && !windowSettings.deps
+        && !windowSettings.arrs
+        && !windowSettings.atc
+      ) {
+        $('#windowLeftSide').hide();
+      }
+      else {
+        $('#windowLeftSide').show();
+      }
+    });
+
+    $('#sliderRwyOne').on('input', () => {
+      let selection = parseInt($('#sliderRwyOne').val());
+      /*let degrees = (selection < 0) ? (360 + selection) : selection;*/
+      degrees = selection;
+      $('.runway-one')
+        .css('transform',
+          `translate(0px) rotate(${degrees}deg)`)
+      $('#labelRunwayDirection').html(Math.round(degrees / 10));
+    })
+
     // Functions
+    function updateRunwayDirection(runwaydata) {     
+      const unique = [...new Set(runwaydata.map(item => item.PrimaryDegrees))]; // [ 9 ]
+      console.log(unique);
+    }
+
+    function getWindowSettings() {
+      let windowSettingsJson = localStorage.getItem('windowSettings');
+      return JSON.parse(windowSettingsJson);
+    }
+
+    function setWindowSettings(settings) {
+      localStorage.setItem('windowSettings', JSON.stringify(settings));
+    }
+
+    function setWindows() {
+
+      let windowSettings = getWindowSettings();
+      if (!windowSettings) {
+        windowSettings = {
+          atis: true,
+          atc: true,
+          nearby: true,
+          filedDeps: true,
+          filedArrs: true,
+          deps: true,
+          arrs: true,
+          weather: true
+        };
+        setWindowSettings(windowSettings);
+      }
+
+      if (
+        !windowSettings.atis
+        && !windowSettings.nearby
+        && !windowSettings.filedDeps
+        && !windowSettings.filedArrs
+        && !windowSettings.deps
+        && !windowSettings.arrs
+        && !windowSettings.atc
+      ) {
+        $('#windowLeftSide').hide();
+      }
+      else {
+        $('#windowLeftSide').show();
+      }
+
+      $('#switchAtis').prop('checked', windowSettings.atis);
+      $('#switchATC').prop('checked', windowSettings.atc);
+      $('#switchNearby').prop('checked', windowSettings.nearby);
+      $('#switchFiledDeps').prop('checked', windowSettings.filedDeps);
+      $('#switchFiledArrs').prop('checked', windowSettings.filedArrs);
+      $('#switchDeps').prop('checked', windowSettings.deps);
+      $('#switchArrs').prop('checked', windowSettings.arrs);
+      $('#switchWeather').prop('checked', windowSettings.weather);
+
+      if (windowSettings.atis) {
+        $('#windowatis').show();
+      } else {
+        $('#windowatis').hide();
+      }
+
+      if (windowSettings.atc) {
+        $('#windowatc').show();
+      } else {
+        $('#windowatc').hide();
+      }
+
+      if (windowSettings.nearby) {
+        $('#windownearby').show();
+      } else {
+        $('#windownearby').hide();
+      }
+
+      if (windowSettings.filedDeps) {
+        $('#windowfiledDeps').show();
+      } else {
+        $('#windowfiledDeps').hide();
+      }
+
+      if (windowSettings.deps) {
+        $('#windowdeps').show();
+      } else {
+        $('#windowdeps').hide();
+      }
+
+      if (windowSettings.filedArrs) {
+        $('#windowfiledArrs').show();
+      } else {
+        $('#windowfiledArrs').hide();
+      }
+
+      if (windowSettings.arrs) {
+        $('#windowarrs').show();
+      } else {
+        $('#windowarrs').hide();
+      }
+      
+      if (windowSettings.weather) {
+        $('#windowweather').show();
+      } else {
+        $('#windowweather').hide();
+      }
+
+    }
+
     function updateMetar(data) {
       if (!data) {
         $('#rawMetar').html(`ICAO code returned no METAR`);
@@ -513,6 +818,8 @@
       $('#cloudList').html(cloudString);
       $('#lastUpdate')
         .html(`Last Update: Day ${data.Day} - ${data.Time.replace('UTC', 'z')} for ${data.ICAO} ${data.Status}`);
+
+
     }
 
     function updateDepartures(departures) {
@@ -520,66 +827,67 @@
         $('#depList').html('');
         $('#depList').show();
         let counter = 0;
+        if (departures) {
+          for (let plane of departures) {
+            counter += 200;
+            let isAirborne = false;
+            let hideDeparted = $('#switchDepsOff').is(':checked');
+            let iconString = "";
+            switch (plane.status) {
+              case "Preparing":
+                iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
+                                     <i class="far fa-clock text-primary"></i>`;
+                break;
+              case "Taxi Out":
+                iconString = `Taxi to Rwy <i class="fas fa-plane-departure text-primary"></i>`;
+                break;
+              case "Departing":
+                iconString = `Departing  <i class="fas fa-plane-departure text-primary"></i>`;
+                break;
+              case "Airborne":
+                isAirborne = true;
+                iconString = `ETA ${plane.calculated_arrival_time.toString().padStart(4, 0).substring(0, 2)}:${plane.calculated_arrival_time.toString().padStart(4, 0).substring(2, 4)}z
+                                    <i class="fas fa-plane text-primary"></i>`;
+                break;
+              case "Arriving":
+                isAirborne = true;
+                iconString = `Arriving at Airport <i class="fas fa-plane-arrival text-primary"></i>`;
+                break;
+              case "Taxi In":
+                isAirborne = true;
+                iconString = `Taxi to Parking <i class="fas fa-plane-arrival text-primary"></i>`;
+                break;
+              case "Arrived":
+                isAirborne = true;
+                iconString = `Arrived at Airport <i class="fas fa-check text-primary"></i>`;
+                break;
+            }
+            if (isAirborne && hideDeparted) {
+              continue;
+            }
 
-        for (let plane of departures) {
-          counter += 200;
-          let isAirborne = false;
-          let hideDeparted = $('#switchDeps').is(':checked');
-          let iconString = "";
-          switch (plane.status) {
-            case "Preparing":
-              iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
-                               <i class="far fa-clock text-primary"></i>`;
-              break;
-            case "Taxi Out":
-              iconString = `Taxi to Rwy <i class="fas fa-plane-departure text-primary"></i>`;
-              break;
-            case "Departing":
-              iconString = `Departing  <i class="fas fa-plane-departure text-primary"></i>`;
-              break;
-            case "Airborne":
-              isAirborne = true;
-              iconString = `ETA ${plane.calculated_arrival_time.toString().padStart(4, 0).substring(0, 2)}:${plane.calculated_arrival_time.toString().padStart(4, 0).substring(2, 4)}z
-                              <i class="fas fa-plane text-primary"></i>`;
-              break;
-            case "Arriving":
-              isAirborne = true;
-              iconString = `Arriving at Airport <i class="fas fa-plane-arrival text-primary"></i>`;
-              break;
-            case "Taxi In":
-              isAirborne = true;
-              iconString = `Taxi to Parking <i class="fas fa-plane-arrival text-primary"></i>`;
-              break;
-            case "Arrived":
-              isAirborne = true;
-              iconString = `Arrived at Airport <i class="fas fa-check text-primary"></i>`;
-              break;
-          }
-          if (isAirborne && hideDeparted) {
-            continue;
-          }
+            // Circuits
+            if (plane.flight_plan.departure === plane.flight_plan.arrival) {
+              iconString = `Circuits <i class="fas fa-retweet"></i>`;
+              isAirborne = false;
+            }
 
-          // Circuits
-          if (plane.flight_plan.departure === plane.flight_plan.arrival) {
-            iconString = `Circuits <i class="fas fa-retweet"></i>`;
-            isAirborne = false;
+            let disabled = (isAirborne) ? 'opacity:0.8;' : '';
+            let cardString =
+              ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none; ${disabled}' title="${plane.name}" >
+                        <h5 class="time-tag">${iconString}</h5>
+                        <h5 class="card-title" id='title-${plane.callsign}'><strong>${plane.callsign}</strong>
+                          <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
+                        </h5>
+                        <h6 class="card-subtitle text-danger">
+                          <sup class="text-muted">To </sup>
+                          <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.arrival}');">${plane.flight_plan.arrival}</strong>
+                          <span class="text-muted airport-name">${plane.arr_airport_shortname} (${plane.arr_airport_name})</span>
+                        </h6>
+                    </li>`
+            $('#depList').append(cardString);
+            $(`#id-${plane.callsign}`).fadeIn(200 + counter);
           }
-
-          let disabled = (isAirborne) ? 'opacity:0.8;' : '';
-          let cardString =
-            ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none; ${disabled}' title="${plane.name}" >
-                  <h5 class="time-tag">${iconString}</h5>
-                  <h5 class="card-title" id='title-${plane.callsign}'><strong>${plane.callsign}</strong>
-                    <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
-                  </h5>
-                  <h6 class="card-subtitle text-danger">
-                    <sup class="text-muted">To </sup>
-                    <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.arrival}');">${plane.flight_plan.arrival}</strong>
-                    <span class="text-muted airport-name">${plane.arr_airport_name}</span>
-                  </h6>
-              </li>`
-          $('#depList').append(cardString);
-          $(`#id-${plane.callsign}`).fadeIn(200 + counter);
         }
       });
     }
@@ -597,7 +905,7 @@
           switch (plane.status) {
             case "Preparing":
               iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
-                              <i class="far fa-clock text-primary"></i>`;
+                                    <i class="far fa-clock text-primary"></i>`;
               break;
             case "Taxi Out":
             case "Departing":
@@ -605,7 +913,7 @@
               break;
             case "Airborne":
               iconString = `ETA ${plane.calculated_arrival_time.toString().padStart(4, 0).substring(0, 2)}:${plane.calculated_arrival_time.toString().padStart(4, 0).substring(2, 4)}z
-                              <i class="fas fa-plane text-primary"></i>`;
+                                    <i class="fas fa-plane text-primary"></i>`;
               break;
             case "Arriving":
             case "Taxi In":
@@ -620,16 +928,16 @@
 
           let disabled = (!isAirborne) ? 'opacity:0.8;' : '';
           let cardString = ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none; ${disabled}' title="${plane.name}">
-                                  <h5 class="time-tag">${iconString}</h5>
-                                  <h5 class="card-title"><strong>${plane.callsign}</strong>
-                                    <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
-                                  </h5>
-                                  <h6 class="card-subtitle text-danger">
-                                    <sup class="text-muted">From </sup>
-                                    <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.departure}');">${plane.flight_plan.departure}</strong>
-                                    <span class="text-muted airport-name">${plane.dep_airport_name}</span>
-                                  </h6>
-                              </li>`
+                                        <h5 class="time-tag">${iconString}</h5>
+                                        <h5 class="card-title"><strong>${plane.callsign}</strong>
+                                          <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
+                                        </h5>
+                                        <h6 class="card-subtitle text-danger">
+                                          <sup class="text-muted">From </sup>
+                                          <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.departure}');">${plane.flight_plan.departure}</strong>
+                                          <span class="text-muted airport-name">${plane.dep_airport_shortname} (${plane.dep_airport_name})</span>
+                                        </h6>
+                                    </li>`
           $('#arrList').append(cardString);
           $(`#id-${plane.callsign}`).fadeIn(200 + counter);
         }
@@ -645,18 +953,18 @@
         for (let plane of filedDepartures) {
           counter += 200;
           let iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
-                              <i class="far fa-clock text-primary"></i>`;
+                                    <i class="far fa-clock text-primary"></i>`;
           let cardString = ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none;' title="${plane.name}" >
-                                  <h5 class="time-tag">${iconString}</h5>
-                                  <h5 class="card-title" style="margin-bottom: 0px">
-                                      <strong>${plane.callsign}</strong>
-                                      <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
-                                      <span class="filed-title text-danger">
-                                        <sup class="text-muted">To </sup>
-                                        <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.arrival}');">${plane.flight_plan.arrival}</strong>
-                                      </span>
-                                  </h5>
-                              </li>`
+                                        <h5 class="time-tag">${iconString}</h5>
+                                        <h5 class="card-title" style="margin-bottom: 0px">
+                                            <strong>${plane.callsign}</strong>
+                                            <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
+                                            <span class="filed-title text-danger">
+                                              <sup class="text-muted">To </sup>
+                                              <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.arrival}');">${plane.flight_plan.arrival}</strong>
+                                            </span>
+                                        </h5>
+                                    </li>`
           $('#filedDepList').append(cardString);
           $(`#id-${plane.callsign}`).fadeIn(300 + counter);
         }
@@ -669,18 +977,18 @@
         for (let plane of filedArrivals) {
           counter += 200;
           let iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
-                              <i class="far fa-clock text-primary"></i>`;
+                                    <i class="far fa-clock text-primary"></i>`;
           let cardString = ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none;' title="${plane.name}">
-                                <h5 class="time-tag">${iconString}</h5>
-                                <h5 class="card-title" style="margin-bottom: 0px">
-                                      <strong>${plane.callsign}</strong>
-                                      <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
-                                      <span class="filed-title text-danger">
-                                        <sup class="text-muted">From </sup>
-                                        <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.departure}');">${plane.flight_plan.departure}</strong>
-                                      </span>
-                                  </h5>
-                            </li>`
+                                      <h5 class="time-tag">${iconString}</h5>
+                                      <h5 class="card-title" style="margin-bottom: 0px">
+                                            <strong>${plane.callsign}</strong>
+                                            <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
+                                            <span class="filed-title text-danger">
+                                              <sup class="text-muted">From </sup>
+                                              <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.departure}');">${plane.flight_plan.departure}</strong>
+                                            </span>
+                                        </h5>
+                                  </li>`
           $('#filedArrList').append(cardString);
           $(`#id-${plane.callsign}`).fadeIn(300 + counter);
         }
@@ -705,8 +1013,8 @@
             iconString = `<i class="fas fa-wifi"></i>`
 
           let cardString = `<li class="list-group-item" title="${atc.name}" style="padding:2px">${iconString} ${atc.callsign}
-                                <span class='text-muted'>${atc.frequency}</span>
-                              </li>`
+                                      <span class='text-muted'>${atc.frequency}</span>
+                                    </li>`
           $('#atcList').append(cardString);
           $(`#id-${atc.callsign}`).fadeIn(200 + counter);
         }
@@ -735,8 +1043,8 @@
             iconString = `<i class="fas fa-question"></i>`
 
           let cardString = `<li class="list-group-item" title="${atc.name}" style="padding:2px">${iconString} ${atc.callsign}
-                                <span class='text-muted'>${atc.frequency}</span>
-                              </li>`
+                                      <span class='text-muted'>${atc.frequency}</span>
+                                    </li>`
           $('#atcClosebyList').append(cardString);
           $(`#id-${atc.callsign}`).fadeIn(300 + counter);
         }

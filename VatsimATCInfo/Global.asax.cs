@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Http;
 using System.Web.Routing;
+using VatsimATCInfo.Models;
 
 namespace VatsimATCInfo
 {
@@ -11,6 +12,8 @@ namespace VatsimATCInfo
     {
         protected void Application_Start()
         {
+            DataStore.LoadData();
+
             GlobalConfiguration.Configure(WebApiConfig.Register);
         }
     }

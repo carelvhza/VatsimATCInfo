@@ -56,7 +56,11 @@ namespace VatsimATCInfo.Models
         public bool is_departure { get; set; }
 
         public string dep_airport_name { get; set; }
+        public string dep_airport_shortname { get; set; }
+        public string dep_airport_country { get; set; }
         public string arr_airport_name { get; set; }
+        public string arr_airport_shortname { get; set; }
+        public string arr_airport_country { get; set; }
         public double distance_from_dep { get; set; }
         public double distance_to_arr { get; set; }
         public string status { get; set; }
@@ -148,7 +152,10 @@ namespace VatsimATCInfo.Models
         public List<Rating> ratings { get; set; }
         public List<PilotRating> pilot_ratings { get; set; }
         public string current_airport_name { get; set; }
+        public string current_airport_shortname { get; set; }
+        public string current_airport_country { get; set; }
         public int airport_height { get; set; }
+        public List<Runway> current_airport_runways { get; set; }
         public List<ATC> online_atc { get; set; }
     }
 

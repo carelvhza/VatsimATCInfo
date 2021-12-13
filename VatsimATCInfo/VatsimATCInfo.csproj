@@ -45,7 +45,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="csharp-metar-decoder, Version=1.0.0.40, Culture=neutral, processorArchitecture=x86">
-      <HintPath>..\packages\csharp-metar-decoder.1.0.0.40\lib\Net45\csharp-metar-decoder.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\vatsim-metar-decoder\csharp-metar-decoder\csharp-metar-decoder\bin\x64\Release\csharp-metar-decoder.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="RestSharp, Version=106.12.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
@@ -106,6 +107,8 @@
     <Compile Include="Helpers\MainEnums.cs" />
     <Compile Include="Models\AirportData.cs" />
     <Compile Include="Models\AtcData.cs" />
+    <Compile Include="Models\DataStore.cs" />
+    <Compile Include="Models\Runway.cs" />
     <Compile Include="Models\VatsimData.cs" />
     <Compile Include="vatsim.asmx.cs">
       <DependentUpon>vatsim.asmx</DependentUpon>
@@ -129,6 +132,25 @@
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
