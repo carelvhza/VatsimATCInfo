@@ -84,6 +84,7 @@
     transition: transform ease-in-out 2s;
     height: 280px;
     width: 70px;
+    display:none;
   }
 
   .slider-runway-one{
@@ -158,6 +159,19 @@
 
   .tooltip.show {
     /*inset: inherit !important; */
+  }
+
+  .select-runway {
+    display:inline;
+  }
+
+  .runway-select {
+    width: 60px;
+    display:inline;
+    font-size:0.8rem;
+  }
+
+  .runway-one {   
   }
 </style>
 <body>
@@ -305,14 +319,35 @@
                 <div class="progress progress-bar-loader2">
                   <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%;"></div>
                 </div>
-                <div class="card-body">
+                <div class="card-body mb-0">
                   <h5 class="card-title" style="font-size:1rem; margin-bottom:0.4rem">METAR</h5>
-                  <h6 id="rawMetar" class="card-subtitle text-muted">Waiting for METAR...</h6>
+                  <h6 id="rawMetar" class="card-subtitle text-muted mb-0">Waiting for METAR...</h6>
                 </div>
-                <div class="slider-runway-one">
+                <label for="exampleSelect1" class="form-label select-runway ml-2">Runways in Use</label>
+                <div class="runway-selectors ml-2" >
+                  <div class="form-group select-runway">
+                    <select class="form-select runway-select" id="selectRunway0" style="display:none" data-runway="0">
+                      <option>25</option>
+                      <option>07</option>                     
+                    </select>
+                  </div>
+                  <div class="form-group select-runway">
+                    <select class="form-select runway-select" id="selectRunway1" style="display:none" data-runway="1">
+                      <option>26</option>
+                      <option>08</option>                     
+                    </select>
+                  </div>
+                  <div class="form-group select-runway">
+                    <select class="form-select runway-select" id="selectRunway2" style="display:none" data-runway="2">
+                      <option>35</option>
+                      <option>17</option>                      
+                    </select>
+                  </div>
+                </div>
+                <!--<div class="slider-runway-one">
                   <span class="text-success" style="display:block">RWY <span id="labelRunwayDirection"> 1</span></span>
                   <input type="range" min="10" max="360" step="10" value="10" class="slider mb-2 form-range " id="sliderRwyOne">
-                </div>
+                </div>-->
                 <div style="text-align:center; position:relative">
                   <div class="wind-text">
                     <h5 class="text-primary"><strong id="windLabel"></strong></h5>
@@ -323,7 +358,15 @@
                   <img src="images/windneedle.png" class="wind-needle" />
                   <img src="images/windneedle_var.png" class="wind-needle-var" />
                   <img src="images/windneedle_var.png" class="wind-needle-var2" />
-                  <img src="images/runway-3.png" class="runway-one" />
+                  <img id="runway0" src="images/runway-5.png" class="runway-one" />
+                  <img id="runway0b" src="images/runway-5.png" class="runway-one" />
+                  <img id="runway0c" src="images/runway-5.png" class="runway-one" />
+                  <img id="runway1" src="images/runway-5.png" class="runway-one" />
+                  <img id="runway1b" src="images/runway-5.png" class="runway-one" />
+                  <img id="runway1c" src="images/runway-5.png" class="runway-one" />
+                  <img id="runway2" src="images/runway-5.png" class="runway-one" />
+                  <img id="runway2b" src="images/runway-5.png" class="runway-one" />
+                  <img id="runway2c" src="images/runway-5.png" class="runway-one" />
                   <!--<img src="images/runway-3.png" class="runway-two" />-->
                 </div>
                 <div class="card-body">
@@ -437,7 +480,10 @@
     var uri = `https://${window.location.host}/vatsim.asmx`;
     var globalTick;
     var globalData;
-    var globalZoom = 1.0;    
+    var globalZoom = 1.0;
+    var globalWeather = null;
+    var keepRunways = false;
+    var globalKeepRunways = 0;
 
     $(() => {
       if (!globalIcao || globalIcao === '') {
@@ -479,8 +525,8 @@
         type: 'POST',
         success: (data) => {
           globalData = data.d;
-          $('.progress-bar-loader').fadeOut(100);
-          updateData(data.d);
+          $('.progress-bar-loader').fadeOut(100);          
+          updateData(data.d);          
         }
       });
 
@@ -492,6 +538,7 @@
         type: 'POST',
         success: (data) => {
           $('.progress-bar-loader2').fadeOut(100);
+          globalWeather = data.d
           updateMetar(data.d);
         }
       });
@@ -528,16 +575,18 @@
       const otherATC = data.controllers
         .filter(co => !co.callsign.includes(globalIcao)
           && co.frequency !== '199.998');
-
+      console.log(data);
       updateDepartures(data.departures);
       updateArrivals(data.arrivals);
       updateFiledData(filedDepartures, filedArrivals);
       updateAtcData(aerodromeATC, otherATC)
       updateAtis(data.atis.filter(a => a.callsign.includes(globalIcao)));
-      updateRunwayData(data.current_runways);
+
+      if (!keepRunways)
+        updateRunwayDirection(data.current_airport_runways);
 
 
-      console.log(data);
+     
     }
 
     // Events
@@ -545,6 +594,7 @@
       clearTimeout(globalTick);
       globalIcao = $('#icaoCode').val().toUpperCase();
       localStorage.setItem('icao', globalIcao);
+      keepRunways = false;
       getDataFromServer();
     });
 
@@ -615,20 +665,165 @@
       }
     });
 
-    $('#sliderRwyOne').on('input', () => {
-      let selection = parseInt($('#sliderRwyOne').val());
-      /*let degrees = (selection < 0) ? (360 + selection) : selection;*/
-      degrees = selection;
-      $('.runway-one')
+    //$('#sliderRwyOne').on('input', () => {
+    //  let selection = parseInt($('#sliderRwyOne').val());
+    //  /*let degrees = (selection < 0) ? (360 + selection) : selection;*/
+    //  degrees = selection;
+    //  $('.runway-one')
+    //    .css('transform',
+    //      `translate(0px) rotate(${degrees}deg)`)
+    //  $('#labelRunwayDirection').html(Math.round(degrees / 10));
+    //})
+
+    $('.runway-select').change((e) => {
+      let runwayNumber = $(e.target).attr('data-runway');
+      let runwayDegrees = $(e.target).prop('value');
+      let calcDegrees = runwayDegrees * 10;
+      $(`#runway${runwayNumber}`)
         .css('transform',
-          `translate(0px) rotate(${degrees}deg)`)
-      $('#labelRunwayDirection').html(Math.round(degrees / 10));
-    })
+          `translate(0px) rotate(${calcDegrees}deg)`)
+      keepRunways = true;
+      setRunways(runwayNumber, calcDegrees, globalKeepRunways);
+    });
+
 
     // Functions
-    function updateRunwayDirection(runwaydata) {     
-      const unique = [...new Set(runwaydata.map(item => item.PrimaryDegrees))]; // [ 9 ]
-      console.log(unique);
+    function updateRunwayDirection(runwaydata) {
+      const unique = [...new Set(runwaydata.map(item => item.PrimaryDegrees))]; // [ 9 ]      
+      $('.runway-select').hide();
+      $('.runway-one').hide();
+      for (let i = 0; i < unique.length; i++) {
+        let runway = runwaydata.filter(a => a.PrimaryDegrees === unique[i]);
+        let runwayCount = runway.length;
+
+        let primary = runway[0].PrimaryDegrees < 10
+          ? `0${runway[0].PrimaryDegrees}`
+          : runway[0].PrimaryDegrees
+        let secondary = runway[0].SecondaryDegrees < 10
+          ? `0${runway[0].SecondaryDegrees}`
+          : runway[0].SecondaryDegrees;
+
+        let htmlString = `<option value="${primary}">${primary}</option>
+                          <option value="${secondary}">${secondary}</option>`;
+
+        let calcDegrees = runway[0].PrimaryDegrees * 10;
+
+       
+        
+
+        $(`#selectRunway${i}`).html(htmlString);
+        $(`#selectRunway${i}`).show();
+        if (globalWeather) {
+          let currentWind = 0;
+          let useNumber = 0
+          if (globalWeather.ICAO === globalIcao) {
+            if (globalWeather.SurfaceWind.MeanDirection) {
+              currentWind = globalWeather.SurfaceWind.MeanDirection.ActualValue;
+            }
+            else {
+              currentWind = 999;
+            }
+            if (currentWind !== 999) {
+              let topEnd = calcDegrees - 90;
+              //if (topEnd < 0)
+              //  topEnd = 360 + topEnd;
+              bottomEnd = calcDegrees + 90;
+              //if (bottomEnd > 359)
+              //  bottomEnd = bottomEnd - 360;
+
+              //console.log("Windcheck");
+
+              //console.log(calcDegrees);
+              //console.log(topEnd);
+              //console.log(bottomEnd);
+
+
+              if (currentWind > bottomEnd)
+                currentWind = currentWind - 360;
+
+              /*  console.log(currentWind);*/
+             
+              useNumber = primary
+
+              if (currentWind == topEnd || currentWind == bottomEnd) {
+                useNumber = primary;
+              } else if (currentWind > topEnd && currentWind < bottomEnd) {
+                useNumber = primary;
+              } else {
+                calcDegrees = runway[0].SecondaryDegrees * 10;
+                useNumber = secondary
+              }
+            }
+            else {
+              useNumber = primary;
+            }
+
+            $(`#selectRunway${i} > option[value="${useNumber}"]`).prop('selected', true)
+
+            setRunways(i, calcDegrees, runwayCount);
+          
+            globalKeepRunways = runwayCount;            
+          }
+        }
+
+        if (i === 2)
+          break;
+      }
+    }
+
+    function setRunways(i, calcDegrees, runwayCount) {
+      let y2 = 0;
+      let x2 = 0;
+      switch (runwayCount) {
+        case 1:
+          $(`#runway${i}`).show();    
+          $(`#runway${i}`)
+            .css('transform',
+              `translate(0px) rotate(${calcDegrees}deg)`)
+          break;
+        case 2:
+          $(`#runway${i}`).show();
+          $(`#runway${i}b`).show();
+          transformDir = calcDegrees - 90;
+          if (transformDir < 0)
+            transformDir = transformDir + 360;
+          y2 = 1 + Math.cos(transformDir) * 40;
+          x2 = 1 - Math.sin(transformDir) * 40;
+
+          $(`#runway${i}`)
+            .css('transform',
+              `translate(0px) rotate(${calcDegrees}deg)`)
+          $(`#runway${i}b`)
+            .css('transform',
+              `translate(${x2}px,${-y2}px) rotate(${calcDegrees}deg)`);
+          break;
+        case 3:
+          $(`#runway${i}`).show();
+          $(`#runway${i}b`).show();
+          $(`#runway${i}c`).show();
+          $(`#runway${i}`)
+            .css('transform',
+              `translate(0px) rotate(${calcDegrees}deg)`)
+          $(`#runway${i}`).show();
+          $(`#runway${i}b`).show();
+          transformDir = calcDegrees - 90;
+          if (transformDir < 0)
+            transformDir = transformDir + 360;
+          y2 = 1 + Math.cos(transformDir) * 40;
+          x2 = 1 - Math.sin(transformDir) * 40;
+          $(`#runway${i}`)
+            .css('transform',
+              `translate(0px) rotate(${calcDegrees}deg)`)
+          $(`#runway${i}b`)
+            .css('transform',
+              `translate(${x2}px,${-y2}px) rotate(${calcDegrees}deg)`);
+          y2 = 1 - Math.cos(transformDir) * 40;
+          x2 = 1 + Math.sin(transformDir) * 40;
+          $(`#runway${i}c`)
+            .css('transform',
+              `translate(${x2}px,${-y2}px) rotate(${calcDegrees}deg)`);
+          break;
+      }
     }
 
     function getWindowSettings() {
@@ -1072,6 +1267,7 @@
       clearTimeout(globalTick);
       globalIcao = icao;
       localStorage.setItem('icao', globalIcao);
+      keepRunways = false;
       getDataFromServer();
     }
 
