@@ -84,7 +84,7 @@ namespace VatsimATCInfo.Models
             {
                 c++;
                 var split = item.Split(',');
-                if (split.Length == 14)
+                if (split.Length == 3)
                 {
                     countryData.Add(new Country()
                     {
