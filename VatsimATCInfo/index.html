@@ -5,6 +5,8 @@
   <link rel="stylesheet" type="text/css" href="css/flatly.css" />
   <link rel="stylesheet" type="text/css" href="css/override.css" />
   <link rel="stylesheet" type="text/css" href="css/all.min.css" />
+  <link rel="stylesheet" href="library/leaflet/leaflet.css" />
+
 </head>
 <style>
   .fix-top {
@@ -56,7 +58,7 @@
     box-shadow: rgba(0,0,0,0.3) 5px 5px 5px 5px;
     border-radius: 3px;
     border: solid rgba(0,0,0,0.3) 0.3px;
-    z-index:10;
+    z-index: 10;
   }
 
   .wind-needle, .wind-needle-var, .wind-needle-var2 {
@@ -69,7 +71,7 @@
     margin: auto;
     transform: translate(-4px);
     transition: transform ease-in-out 2s;
-    z-index:5;
+    z-index: 5;
   }
 
   .runway-one {
@@ -84,18 +86,18 @@
     transition: transform ease-in-out 2s;
     height: 280px;
     width: 70px;
-    display:none;
+    display: none;
   }
 
-  .slider-runway-one{
+  .slider-runway-one {
     /*position:absolute;
     bottom:0;*/
-    right:0;
-    left:0;
-    margin-left:auto;
-    margin-right:auto;    
-    text-align:center;
-    width:100%;
+    right: 0;
+    left: 0;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 100%;
   }
 
   .wind-needle-var, .wind-needle-var2 {
@@ -137,7 +139,7 @@
   .text-scale {
     padding: 4px;
     margin-right: 1rem;
-    font-size:1.2rem;
+    font-size: 1.2rem;
     color: rgba(255,255,255,0.3)
   }
 
@@ -154,7 +156,7 @@
   }
 
   #sliderRwyOne {
-    width:80%;
+    width: 80%;
   }
 
   .tooltip.show {
@@ -162,7 +164,7 @@
   }
 
   .select-runway {
-    display:inline;
+    display: inline;
   }
 
   .runway-selectors {
@@ -175,9 +177,9 @@
     font-size: 0.8rem;
   }
 
-  .label-weather-visibility {      
-    text-align:right;
-    display:block;
+  .label-weather-visibility {
+    text-align: right;
+    display: block;
   }
 
   #labelVisibility {
@@ -224,32 +226,32 @@
   }
 
   #cloudList {
-    font-size:1rem; 
-    width: 55%; 
-    display:inline-block;
+    font-size: 1rem;
+    width: 55%;
+    display: inline-block;
   }
 
   .weather-condition-box {
     display: inline-block;
     width: 40%;
-    text-align:center;
-    padding:5px;
-    position:relative;
+    text-align: center;
+    padding: 5px;
+    position: relative;
     border: #ddd solid 1px;
     border-radius: 5px;
   }
 
   .label-condition {
-    display:block;
-    font-size:smaller;
+    display: block;
+    font-size: smaller;
     color: #333;
   }
 
   .label-special-wind {
-    position:absolute;
-    top:4px;
-    right:2px;;
-
+    position: absolute;
+    top: 4px;
+    right: 2px;
+    ;
   }
 
   .background-clear {
@@ -263,9 +265,41 @@
   .background-cloudy {
     background: linear-gradient(27deg, rgba(71,71,71,0) 24%, rgba(73,85,88,1) 94%);
   }
+
   .background-rain {
     background: linear-gradient(27deg, rgba(71,71,71,0) 4%, rgba(19, 27, 40,1) 74%);
-  }  
+  }
+
+  #mapLeaflet {
+    height: 250px;
+    max-width: 500px;
+    margin-bottom: 10px;   
+  }
+
+  #windowmap {
+    width: 50%;
+    display: none;
+    position:relative;
+  }
+
+  #zoomView {
+    position: absolute;
+    top: 10px;
+    left: 25px;
+    z-index: 1000;
+    padding: 6px;
+  }
+
+  #windowLeftSide {
+    overflow-y: auto;
+    height: calc(100vh - 70px);
+  }
+
+  .leaflet-overlay-pane {
+    z-index: 900;
+  }
+
+
 </style>
 <body>
   <div id="body-global">
@@ -317,25 +351,30 @@
                 </div>
               </div>
             </div>
+
           </div>
           <div class="row">
-            <div id="windowatc" class="col">
+            <div id="windowatc" class="col" >
               <div class="card text-white bg-info mb-3" style="max-width: 100%;">
                 <div class="card-header">Aerodrome ATC</div>
                 <div id="atcList" class="card-body" style="font-size: smaller;">
                 </div>
               </div>
             </div>
-            <div id="windownearby" class="col">
+            <div id="windownearby" class="col" >
               <div class="card text-white bg-info mb-3" style="max-width: 100%;">
                 <div class="card-header">Nearby ATC and Observers</div>
                 <div id="atcClosebyList" class="card-body" style="font-size: smaller;">
                 </div>
               </div>
             </div>
+            <div id="windowmap" class="col">
+              <button id="zoomView" class="btn btn-info"><i class="fa fa-search"></i></button>
+              <div id="mapLeaflet"></div>
+            </div>
           </div>
           <div class="row">
-            <div class="col-lg-6">
+            <div class="col">
               <div id="windowfiledDeps" class="row">
                 <div class="col-lg-12">
                   <div class="card text-black bg-light mb-3" style="max-width: 100%;">
@@ -365,7 +404,7 @@
                 </div>
               </div>
             </div>
-            <div class="col-lg-6">
+            <div class="col">
               <div id="windowfiledArrs" class="row">
                 <div class="col-lg-12">
                   <div class="card text-black bg-light mb-3" style="max-width: 100%;">
@@ -387,12 +426,6 @@
                 </div>
               </div>
             </div>
-            <div class="col-lg-4">
-              <div class="row">
-
-              </div>
-            </div>
-
           </div>
         </div>
         <!-- Right col -->
@@ -439,7 +472,7 @@
                   </div>
                   <span id="labelVisibility"><i class="fa fa-eye text-info"></i> <strong id="labelVisibilityValue"></strong></span>
                 </div>
-                <div class="card-text label-weather-visibility"></div>             
+                <div class="card-text label-weather-visibility"></div>
                 <div style="text-align:center; position:relative">
                   <div class="wind-text">
                     <h5 class="text-primary"><strong id="windLabel"></strong></h5>
@@ -484,8 +517,8 @@
                   <hr />
                 </div>
                 <div class="card-body">
-                  <h5 class="text-primary">Clouds and Condition <span id="badgeIMCVMC"></span></h5> 
-                  <ul id="cloudList" class="list-group list-group-flush" >
+                  <h5 class="text-primary">Clouds and Condition <span id="badgeIMCVMC"></span></h5>
+                  <ul id="cloudList" class="list-group list-group-flush">
                   </ul>
                   <div class="weather-condition-box">
                     <div id="weatherCondition">
@@ -497,9 +530,6 @@
                 <div class="card-footer text-muted" id="lastUpdate">
                   Waiting for update...
                 </div>
-
-
-              </div>
               </div>
             </div>
           </div>
@@ -516,7 +546,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body" style=" padding: 2rem;">
-       
+
           <div class="row">
             <div class="col-sm-6">
               <div class="form-group">
@@ -554,15 +584,19 @@
                     <input class="form-check-input window-switches" type="checkbox" id="switchWeather" data-window="weather">
                     <label class="form-check-label" for="switchWeather">Weather</label>
                   </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input window-switches" type="checkbox" id="switchMap" data-window="map">
+                    <label class="form-check-label" for="switchMap">Map</label>
+                  </div>
                 </fieldset>
               </div>
             </div>
             <div class="col-sm-6">
               <div class="form-group">
                 <legend class="mt-4">UI</legend>
-                <fieldset class="fix-switches">                 
+                <fieldset class="fix-switches">
                   <div class="form-input mb-2">
-                    <span style="font-size: 1.2rem" >Scale</span>
+                    <span style="font-size: 1.2rem">Scale</span>
                     <button id="buttonIncreaseZoom" class="btn btn-sm btn-dark my-2 my-sm-0 ml-1">
                       <i class="fas fa-plus text-white" style="display: inline; font-size: 1rem;"></i>
                     </button>
@@ -593,11 +627,13 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="library/leaflet/leaflet.js"></script>
+  <script src="library/leaflet/plugins/leaflet.rotatedMarker.js"></script>
   <script>
     var globalIcao = localStorage.getItem('icao');
     var globalAirportHeight = 5558;
     var url = window.location.host;
-    var uri = `https://${window.location.host}/vatsim.asmx`;
+    var uri = `https://${window.location.host}${window.location.pathname}/vatsim.asmx`;
     var globalTick;
     var globalData;
     var globalZoom = 1.0;
@@ -607,6 +643,10 @@
     var globalAirportInfo = null;
     var globalShowWeatherBackground = true;
     var globalDarkBackground = false;
+    var map = null;
+    var refresh = false;
+    var leafletMarkers = null;
+    var aipMap = null;
 
     $(() => {
       if (!globalIcao || globalIcao === '') {
@@ -629,14 +669,13 @@
 
       globalShowWeatherBackground = localStorage.getItem('globalShowWeatherBackground') === 'true';
       if (globalShowWeatherBackground === null) {
-        globalShowWeatherBackground = true;        
+        globalShowWeatherBackground = true;
       }
       $('#switchBackground').prop('checked', globalShowWeatherBackground);
 
       globalDarkBackground = localStorage.getItem('globalDarkBackground') === 'true';
-      console.log(globalDarkBackground);
       if (globalDarkBackground === null) {
-        globalDarkBackground = false;        
+        globalDarkBackground = false;
       }
       $('#switchDark').prop('checked', globalDarkBackground);
 
@@ -726,7 +765,6 @@
       const otherATC = data.controllers
         .filter(co => !co.callsign.includes(globalIcao)
           && co.frequency !== '199.998');
-      console.log(data);
       updateDepartures(data.departures);
       updateArrivals(data.arrivals);
       updateFiledData(filedDepartures, filedArrivals);
@@ -736,24 +774,30 @@
       if (!keepRunways)
         updateRunwayDirection(data.current_airport_runways);
 
+      if (!refresh) {
+        redrawMap(data);
+      }
 
-     
+      redrawMarkers(data);
     }
+
+
 
     // Events
     $('#loadIcao').click(() => {
-      clearTimeout(globalTick);      
+      clearTimeout(globalTick);
       if (!$('#icaoCode').val() || $('#icaoCode').val() === '') {
         $('error-message').show();
         $('error-message').html('Cannot read icao code, please type a code in and press enter.');
       }
       else {
-        $('error-message').hide();        
+        $('error-message').hide();
         globalIcao = $('#icaoCode').val().toUpperCase();
       }
-     
+
       localStorage.setItem('icao', globalIcao);
       keepRunways = false;
+      refresh = false;
       getDataFromServer();
     });
 
@@ -812,7 +856,7 @@
         $('body').prop('style', '');
       }
     })
-        
+
     $('.window-switches').click((e) => {
       let windowSettings = getWindowSettings();
       let targetWindow = $(e.target).attr('data-window');
@@ -826,6 +870,10 @@
       }
       setWindowSettings(windowSettings);
 
+      if (targetWindow === 'map' && isChecked) {
+        redrawMap(globalAirportInfo, true);
+      }
+
       if (
         !windowSettings.atis
         && !windowSettings.nearby
@@ -834,6 +882,7 @@
         && !windowSettings.deps
         && !windowSettings.arrs
         && !windowSettings.atc
+        && !windowSettings.map
       ) {
         $('#windowLeftSide').hide();
       }
@@ -841,16 +890,6 @@
         $('#windowLeftSide').show();
       }
     });
-
-    //$('#sliderRwyOne').on('input', () => {
-    //  let selection = parseInt($('#sliderRwyOne').val());
-    //  /*let degrees = (selection < 0) ? (360 + selection) : selection;*/
-    //  degrees = selection;
-    //  $('.runway-one')
-    //    .css('transform',
-    //      `translate(0px) rotate(${degrees}deg)`)
-    //  $('#labelRunwayDirection').html(Math.round(degrees / 10));
-    //})
 
     $('.runway-select').change((e) => {
       let runwayNumber = $(e.target).attr('data-runway');
@@ -863,18 +902,125 @@
       let runway = globalAirportInfo.current_airport_runways
         .filter(a => a.PrimaryDegrees === parseInt(runwayDegrees)
           || a.SecondaryDegrees === parseInt(runwayDegrees));
-      console.log(runway.length);
       setRunways(runwayNumber, calcDegrees, runway.length);
     });
 
+    $('#zoomView').click(() => {
+      let lat = globalAirportInfo.current_airport_lat;
+      let lon = globalAirportInfo.current_airport_lon;
+     
+      if (map.getZoom() === 9)
+        //redrawMap(globalAirportInfo, true, 12)
+        map.setZoom(12);
+      else
+        map.setZoom(9);
+        //redrawMap(globalAirportInfo, true, 9)
+    })
+
 
     // Functions
+    function redrawMap(data, doMarkers, zoom) {
+      if (!zoom) {
+        zoom = 9;
+      }
+      if (map) {
+        map.remove();
+      }
+      let lat = data.current_airport_lat;
+      let lon = data.current_airport_lon;
+      map = L.map('mapLeaflet',
+        {
+          zoomControl: false,
+          scrollWheelZoom: false,
+          dragging: false
+        }
+      ).setView([lat, lon], zoom);
+      osm = false;
+      if (osm) {
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 18,
+          zoomControl: false
+        }).addTo(map);
+      }
+      else {
+        // Stadia
+        L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+          maxZoom: 20,
+          attribution: '&copy;<a href="https://stadiamaps.com/">Stadia Maps</a>,&copy;<a href="https://openmaptiles.org/">OpenMapTiles</a>&copy;<a href="http://openstreetmap.org">OpenStreetMap</a> contributors'         
+        }).addTo(map);
+      }
+
+
+
+      refresh = true;
+
+      L.circle([lat, lon], {
+        color: 'rgba(66, 144, 245,0.3)',
+        fillColor: 'rgba(66, 144, 245,0.2)',
+        fillOpacity: 0.3,
+        radius: 7000
+      }).addTo(map);
+
+      data.current_airport_runways.forEach((runway) => {
+        L.polyline([[runway.PrimaryLat, runway.PrimaryLon], [runway.SecondaryLat, runway.SecondaryLon]],
+          {
+            color: 'rgba(252, 186, 3, 0.6)'
+          }).addTo(map);       
+      })
+
+     
+
+      if (doMarkers) {
+        redrawMarkers(data);
+      }
+    }
+
+    function redrawMarkers(data) {
+      if (!leafletMarkers) {
+        leafletMarkers = new L.LayerGroup();;
+      }
+
+      leafletMarkers.clearLayers();
+
+      let planeIconDepart = L.icon({
+        iconUrl: 'images/plane-green.png',
+        iconSize: [14, 14],
+      });
+
+      let planeIconArrive = L.icon({
+        iconUrl: 'images/plane-red.png',
+        iconSize: [14, 14],
+      });
+
+      data.pilots.forEach((plane) => {
+        let dir = plane.heading - 45;
+        if (dir < 0) {
+          dir = 360 + dir;
+        }
+
+        let depArr = "None";
+        if (plane.flight_plan) {
+          depArr = plane.flight_plan.departure;
+        }
+
+        let marker = L.marker([plane.latitude, plane.longitude],
+          {
+            icon: depArr === globalIcao ? planeIconDepart : planeIconArrive,
+            rotationAngle: dir,
+            rotationOrigin: 'center'
+          });
+        leafletMarkers.addLayer(marker);
+
+      })
+
+      map.addLayer(leafletMarkers);
+    }
+
     function updateRunwayDirection(runwaydata) {
-      console.log('Update Runway Direction');
-      const unique = [...new Set(runwaydata.map(item => item.PrimaryDegrees))]; // [ 9 ]      
+      const unique = [...new Set(runwaydata.map(item => item.PrimaryDegrees))]; // [ 9 ]
       $('.runway-select').hide();
       $('.runway-one').hide();
-      console.log(unique.length + ' to process');
       for (let i = 0; i < unique.length; i++) {
         let runway = runwaydata.filter(a => a.PrimaryDegrees === unique[i]);
         let runwayCount = runway.length;
@@ -887,16 +1033,15 @@
           : runway[0].SecondaryDegrees;
 
         let htmlString = `<option value="${primary}">${primary}</option>
-                          <option value="${secondary}">${secondary}</option>`;
+                                <option value="${secondary}">${secondary}</option>`;
 
         let calcDegrees = runway[0].PrimaryDegrees * 10;
 
-       
-        
+
+
 
         $(`#selectRunway${i}`).html(htmlString);
         $(`#selectRunway${i}`).show();
-        console.log('Is there weather yet?\_')
         if (globalWeather) {
           let currentWind = 0;
           let useNumber = 0
@@ -909,24 +1054,11 @@
             }
             if (currentWind !== 999) {
               let topEnd = calcDegrees - 90;
-              //if (topEnd < 0)
-              //  topEnd = 360 + topEnd;
+
               bottomEnd = calcDegrees + 90;
-              //if (bottomEnd > 359)
-              //  bottomEnd = bottomEnd - 360;
-
-              //console.log("Windcheck");
-
-              //console.log(calcDegrees);
-              //console.log(topEnd);
-              //console.log(bottomEnd);
-
 
               if (currentWind > bottomEnd)
                 currentWind = currentWind - 360;
-
-              /*  console.log(currentWind);*/
-
               useNumber = primary
 
               if (currentWind == topEnd || currentWind == bottomEnd) {
@@ -961,13 +1093,12 @@
     }
 
     function setRunways(i, calcDegrees, runwayCount) {
-      console.log("Set Runways");
       let y2 = 0;
       let x2 = 0;
       let toRadian = (Math.PI / 180.0);
       switch (runwayCount) {
         case 1:
-          $(`#runway${i}`).show();    
+          $(`#runway${i}`).show();
           $(`#runway${i}`)
             .css('transform',
               `translate(0px) rotate(${calcDegrees}deg)`)
@@ -977,18 +1108,10 @@
           $(`#runway${i}b`).show();
           transformDir = calcDegrees - 90.0;
           if (transformDir < 0)
-            transformDir = 360 + transformDir;    
-          
+            transformDir = 360 + transformDir;
+
           x2 = Math.round(Math.sin(transformDir * toRadian) * 40);
           y2 = -Math.round(Math.cos(transformDir * toRadian) * 40);
-          
-
-          console.log(transformDir);
-          //console.log(y2);
-          console.log(x2);
-          //console.log(x2);
-          console.log(y2);
-
 
           // RWY a
           $(`#runway${i}`).css('transform',
@@ -996,21 +1119,21 @@
 
           // RWY b
           $(`#runway${i}b`).css('transform',
-              `rotate(${calcDegrees}deg)`);
+            `rotate(${calcDegrees}deg)`);
           $(`#runway${i}bmove`).css('transform',
-              `translate(${x2}px,${y2}px) `);
+            `translate(${x2}px,${y2}px) `);
           break;
         case 3:
           $(`#runway${i}`).show();
           $(`#runway${i}b`).show();
           $(`#runway${i}c`).show();
-          
+
           transformDir = calcDegrees - 90.0;
           if (transformDir < 0)
             transformDir = 360 + transformDir;
-    
 
-          x2 = Math.round(Math.sin(transformDir * toRadian) * 40);  
+
+          x2 = Math.round(Math.sin(transformDir * toRadian) * 40);
           y2 = -Math.round(Math.cos(transformDir * toRadian) * 40);
 
           // RWY a
@@ -1023,7 +1146,7 @@
           $(`#runway${i}bmove`).css('transform',
             `translate(${x2}px,${y2}px) `);
 
-          transformDir = calcDegrees + 90.0;         
+          transformDir = calcDegrees + 90.0;
           if (transformDir > 360)
             transformDir = transformDir - 360;
 
@@ -1045,6 +1168,10 @@
     }
 
     function setWindowSettings(settings) {
+      // Backwards compatibility
+      if (settings.map === null) {
+        settings.map = true;
+      }
       localStorage.setItem('windowSettings', JSON.stringify(settings));
     }
 
@@ -1060,8 +1187,9 @@
           filedArrs: true,
           deps: true,
           arrs: true,
-          weather: true
-        };
+          weather: true,
+          map: true
+        };       
         setWindowSettings(windowSettings);
       }
 
@@ -1088,6 +1216,7 @@
       $('#switchDeps').prop('checked', windowSettings.deps);
       $('#switchArrs').prop('checked', windowSettings.arrs);
       $('#switchWeather').prop('checked', windowSettings.weather);
+      $('#switchMap').prop('checked', windowSettings.map);
 
       if (windowSettings.atis) {
         $('#windowatis').show();
@@ -1130,11 +1259,17 @@
       } else {
         $('#windowarrs').hide();
       }
-      
+
       if (windowSettings.weather) {
         $('#windowweather').show();
       } else {
         $('#windowweather').hide();
+      }
+
+      if (windowSettings.map) {
+        $('#windowmap').show();
+      } else {
+        $('#windowmap').hide();
       }
 
     }
@@ -1144,7 +1279,7 @@
         $('#rawMetar').html(`ICAO code returned no METAR`);
         return;
       }
-            
+
       $('#rawMetar').html(data.RawMetar);
 
       // Pressure
@@ -1233,12 +1368,12 @@
           let cloudType = getCloudType(cloud.Amount);
           let cloudIcon = getCloudIcon(cloud.Amount);
           cloudString +=
-            `<li class="list-group-item"> 
-                ${cloudIcon} ${cloud.BaseHeight.ActualValue}<sub class='text-muted'>ft</sub>
-                <sup class="text-muted">${cloudType}</sup>
-            </li>`
+            `<li class="list-group-item">
+                      ${cloudIcon} ${cloud.BaseHeight.ActualValue}<sub class='text-muted'>ft</sub>
+                      <sup class="text-muted">${cloudType}</sup>
+                  </li>`
         }
-      } else {       
+      } else {
         cloudString = '';
       }
       $('#cloudList').html(cloudString);
@@ -1247,10 +1382,10 @@
 
       // Condition
       setCondition();
-     
-     
 
-    // IMC VMC
+
+
+      // IMC VMC
       let imcvmc = '<span class="badge bg-success">VMC</span>';
       if (data.Visibility) {
         if (
@@ -1325,8 +1460,8 @@
       }
 
       let weatherStr = ` ${weatherIcon}
-                      <span class="label-condition">${condition1}</span>
-                      <span class="label-condition">${condition2}</span>`
+                            <span class="label-condition">${condition1}</span>
+                            <span class="label-condition">${condition2}</span>`
 
       $('#weatherCondition').html(weatherStr);
 
@@ -1378,7 +1513,7 @@
             switch (plane.status) {
               case "Preparing":
                 iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
-                                     <i class="far fa-clock text-primary"></i>`;
+                                           <i class="far fa-clock text-primary"></i>`;
                 break;
               case "Taxi Out":
                 iconString = `Taxi to Rwy <i class="fas fa-plane-departure text-primary"></i>`;
@@ -1389,7 +1524,7 @@
               case "Airborne":
                 isAirborne = true;
                 iconString = `ETA ${plane.calculated_arrival_time.toString().padStart(4, 0).substring(0, 2)}:${plane.calculated_arrival_time.toString().padStart(4, 0).substring(2, 4)}z
-                                    <i class="fas fa-plane text-primary"></i>`;
+                                          <i class="fas fa-plane text-primary"></i>`;
                 break;
               case "Arriving":
                 isAirborne = true;
@@ -1418,16 +1553,16 @@
             let flagString = `<img height="10" width="15" src="images/flags/${plane.arr_airport_country_code}.svg" title="${plane.arr_airport_country}" />`
             let cardString =
               ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none; ${disabled}' title="${plane.name}" >
-                        <h5 class="time-tag">${iconString}</h5>
-                        <h5 class="card-title" id='title-${plane.callsign}'><strong>${plane.callsign}</strong>
-                          <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
-                        </h5>
-                        <h6 class="card-subtitle text-danger">
-                          <sup class="text-muted">To </sup>
-                          <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.arrival}');">${flagString} ${plane.flight_plan.arrival}</strong>
-                          <span class="text-muted airport-name">${plane.arr_airport_shortname} (${plane.arr_airport_name})</span>
-                        </h6>
-                    </li>`
+                              <h5 class="time-tag">${iconString}</h5>
+                              <h5 class="card-title" id='title-${plane.callsign}'><strong>${plane.callsign}</strong>
+                                <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
+                              </h5>
+                              <h6 class="card-subtitle text-danger">
+                                <sup class="text-muted">To </sup>
+                                <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.arrival}');">${flagString} ${plane.flight_plan.arrival}</strong>
+                                <span class="text-muted airport-name">${plane.arr_airport_shortname} (${plane.arr_airport_name})</span>
+                              </h6>
+                          </li>`
             $('#depList').append(cardString);
             $(`#id-${plane.callsign}`).fadeIn(200 + counter);
           }
@@ -1448,7 +1583,7 @@
           switch (plane.status) {
             case "Preparing":
               iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
-                                    <i class="far fa-clock text-primary"></i>`;
+                                          <i class="far fa-clock text-primary"></i>`;
               break;
             case "Taxi Out":
             case "Departing":
@@ -1456,7 +1591,7 @@
               break;
             case "Airborne":
               iconString = `ETA ${plane.calculated_arrival_time.toString().padStart(4, 0).substring(0, 2)}:${plane.calculated_arrival_time.toString().padStart(4, 0).substring(2, 4)}z
-                                    <i class="fas fa-plane text-primary"></i>`;
+                                          <i class="fas fa-plane text-primary"></i>`;
               break;
             case "Arriving":
             case "Taxi In":
@@ -1472,16 +1607,16 @@
           let disabled = (!isAirborne) ? 'opacity:0.8;' : '';
           let flagString = `<img height="10" width="15" src="images/flags/${plane.dep_airport_country_code}.svg" title="${plane.dep_airport_country}" />`
           let cardString = ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none; ${disabled}' title="${plane.name}">
-                                        <h5 class="time-tag">${iconString}</h5>
-                                        <h5 class="card-title"><strong>${plane.callsign}</strong>
-                                          <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
-                                        </h5>
-                                        <h6 class="card-subtitle text-danger">
-                                          <sup class="text-muted">From </sup>
-                                          <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.departure}');">${flagString} ${plane.flight_plan.departure}</strong>
-                                          <span class="text-muted airport-name">${plane.dep_airport_shortname} (${plane.dep_airport_name})</span>
-                                        </h6>
-                                    </li>`
+                                              <h5 class="time-tag">${iconString}</h5>
+                                              <h5 class="card-title"><strong>${plane.callsign}</strong>
+                                                <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
+                                              </h5>
+                                              <h6 class="card-subtitle text-danger">
+                                                <sup class="text-muted">From </sup>
+                                                <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.departure}');">${flagString} ${plane.flight_plan.departure}</strong>
+                                                <span class="text-muted airport-name">${plane.dep_airport_shortname} (${plane.dep_airport_name})</span>
+                                              </h6>
+                                          </li>`
           $('#arrList').append(cardString);
           $(`#id-${plane.callsign}`).fadeIn(200 + counter);
         }
@@ -1497,18 +1632,18 @@
         for (let plane of filedDepartures) {
           counter += 200;
           let iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
-                                    <i class="far fa-clock text-primary"></i>`;
+                                          <i class="far fa-clock text-primary"></i>`;
           let cardString = ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none;' title="${plane.name}" >
-                                        <h5 class="time-tag">${iconString}</h5>
-                                        <h5 class="card-title" style="margin-bottom: 0px">
-                                            <strong>${plane.callsign}</strong>
-                                            <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
-                                            <span class="filed-title text-danger">
-                                              <sup class="text-muted">To </sup>
-                                              <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.arrival}');">${plane.flight_plan.arrival}</strong>
-                                            </span>
-                                        </h5>
-                                    </li>`
+                                              <h5 class="time-tag">${iconString}</h5>
+                                              <h5 class="card-title" style="margin-bottom: 0px">
+                                                  <strong>${plane.callsign}</strong>
+                                                  <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
+                                                  <span class="filed-title text-danger">
+                                                    <sup class="text-muted">To </sup>
+                                                    <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.arrival}');">${plane.flight_plan.arrival}</strong>
+                                                  </span>
+                                              </h5>
+                                          </li>`
           $('#filedDepList').append(cardString);
           $(`#id-${plane.callsign}`).fadeIn(300 + counter);
         }
@@ -1521,18 +1656,18 @@
         for (let plane of filedArrivals) {
           counter += 200;
           let iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
-                                    <i class="far fa-clock text-primary"></i>`;
+                                          <i class="far fa-clock text-primary"></i>`;
           let cardString = ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none;' title="${plane.name}">
-                                      <h5 class="time-tag">${iconString}</h5>
-                                      <h5 class="card-title" style="margin-bottom: 0px">
-                                            <strong>${plane.callsign}</strong>
-                                            <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
-                                            <span class="filed-title text-danger">
-                                              <sup class="text-muted">From </sup>
-                                              <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.departure}');">${plane.flight_plan.departure}</strong>
-                                            </span>
-                                        </h5>
-                                  </li>`
+                                            <h5 class="time-tag">${iconString}</h5>
+                                            <h5 class="card-title" style="margin-bottom: 0px">
+                                                  <strong>${plane.callsign}</strong>
+                                                  <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
+                                                  <span class="filed-title text-danger">
+                                                    <sup class="text-muted">From </sup>
+                                                    <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.departure}');">${plane.flight_plan.departure}</strong>
+                                                  </span>
+                                              </h5>
+                                        </li>`
           $('#filedArrList').append(cardString);
           $(`#id-${plane.callsign}`).fadeIn(300 + counter);
         }
@@ -1557,8 +1692,8 @@
             iconString = `<i class="fas fa-wifi"></i>`
 
           let cardString = `<li class="list-group-item" title="${atc.name}" style="padding:2px">${iconString} ${atc.callsign}
-                                      <span class='text-muted'>${atc.frequency}</span>
-                                    </li>`
+                                            <span class='text-muted'>${atc.frequency}</span>
+                                          </li>`
           $('#atcList').append(cardString);
           $(`#id-${atc.callsign}`).fadeIn(200 + counter);
         }
@@ -1587,8 +1722,8 @@
             iconString = `<i class="fas fa-question"></i>`
 
           let cardString = `<li class="list-group-item" title="${atc.name}" style="padding:2px">${iconString} ${atc.callsign}
-                                      <span class='text-muted'>${atc.frequency}</span>
-                                    </li>`
+                                            <span class='text-muted'>${atc.frequency}</span>
+                                          </li>`
           $('#atcClosebyList').append(cardString);
           $(`#id-${atc.callsign}`).fadeIn(300 + counter);
         }
@@ -1616,6 +1751,7 @@
       clearTimeout(globalTick);
       globalIcao = icao;
       localStorage.setItem('icao', globalIcao);
+      refresh = false;
       keepRunways = false;
       getDataFromServer();
     }
@@ -1682,7 +1818,7 @@
           break;
         default: return '<span class="badge bg-info">Unknown</span>';
           break;
-          
+
       }
     }
 

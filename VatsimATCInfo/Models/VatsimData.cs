@@ -156,6 +156,8 @@ namespace VatsimATCInfo.Models
         public string current_airport_shortname { get; set; }
         public string current_airport_country { get; set; }
         public string current_airport_country_code { get; set; }
+        public double current_airport_lat { get; set; }
+        public double current_airport_lon { get; set; }
         public int airport_height { get; set; }
         public List<Runway> current_airport_runways { get; set; }
         public List<ATC> online_atc { get; set; }

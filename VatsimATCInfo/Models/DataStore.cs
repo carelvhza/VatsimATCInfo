@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.Hosting;
@@ -99,31 +100,46 @@ namespace VatsimATCInfo.Models
 
         private static void LoadRunways()
         {
-            var mainFile = File.ReadAllLines(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "runways.dat"));
+            var mainFile = File.ReadAllLines(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "runways.csv"));
             var runwayData = new List<Runway>();
             var c = 0;
             foreach (var item in mainFile)
             {
                 c++;
                 var split = item.Split(',');
-                if (split.Length == 5)
+                if (split.Length == 20)
                 {
-                    var primaryWithoutLetters = _getNumbers(split[1]);
-                    var secondaryWithoutLetters = _getNumbers(split[3]);
+                    var primaryWithoutLetters = _getNumbers(split[8]?.Replace("\"", ""));
+                    var secondaryWithoutLetters = _getNumbers(split[14]?.Replace("\"", ""));
                     int primaryDegrees = 0;
                     int secondaryDegrees = 0;
 
                     int.TryParse(primaryWithoutLetters, out primaryDegrees);
                     int.TryParse(secondaryWithoutLetters, out secondaryDegrees);
 
-                    runwayData.Add(new Runway()
-                    {
-                        ICAO = split[0],
-                        Primary = split[1],
-                        PrimaryDegrees = primaryDegrees,
-                        Secondary = split[3],
-                        SecondaryDegrees = secondaryDegrees
-                    });
+                    //runwayData.Add(new Runway()
+                    //{
+                    //    ICAO = split[2]?.Replace("\"", ""),
+                    //    Primary = split[8]?.Replace("\"", ""),
+                    //    PrimaryDegrees = primaryDegrees,
+                    //    Secondary = split[14]?.Replace("\"", ""),
+                    //    SecondaryDegrees = secondaryDegrees,
+                    //    PrimaryLat = !string.IsNullOrEmpty(split[9]) ? Convert.ToDouble(split[9]) : 0.0,
+                    //    PrimaryLon = !string.IsNullOrEmpty(split[10]) ? Convert.ToDouble(split[10]) : 0.0,
+                    //    SecondaryLat = !string.IsNullOrEmpty(split[15]) ? Convert.ToDouble(split[15]) : 0.0,
+                    //    SecondaryLon = !string.IsNullOrEmpty(split[16]) ? Convert.ToDouble(split[16]) : 0.0
+                    //});
+                    var rw = new Runway();
+                    rw.ICAO = split[2]?.Replace("\"", "");
+                    rw.Primary = split[8]?.Replace("\"", "");
+                    rw.PrimaryDegrees = primaryDegrees;
+                    rw.Secondary = split[14]?.Replace("\"", "");
+                    rw.SecondaryDegrees = secondaryDegrees;
+                    rw.PrimaryLat = !string.IsNullOrEmpty(split[9]) ? Convert.ToDouble(split[9]) : 0.0;
+                    rw.PrimaryLon = !string.IsNullOrEmpty(split[10]) ? Convert.ToDouble(split[10]) : 0.0;
+                    rw.SecondaryLat = !string.IsNullOrEmpty(split[15]) ? Convert.ToDouble(split[15]) : 0.0;
+                    rw.SecondaryLon = !string.IsNullOrEmpty(split[16]) ? Convert.ToDouble(split[16]) : 0.0;
+                    runwayData.Add(rw);
                 }
             }
             _runways = runwayData;

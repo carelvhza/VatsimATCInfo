@@ -71,6 +71,8 @@ namespace VatsimATCInfo
                 vatsimData.current_airport_shortname = currentAirport.ShortName;
                 vatsimData.current_airport_country = currentAirport.Country;
                 vatsimData.current_airport_country_code = currentAirport.CountryCode;
+                vatsimData.current_airport_lat = currentAirport.Latitude;
+                vatsimData.current_airport_lon = currentAirport.Longitude;
                 vatsimData.airport_height = currentAirport.Altitude;
                 vatsimData.current_airport_runways = currentAirport.Runways;
                 vatsimData.pilots = vatsimData.pilots.Where(pi => pi.flight_plan != null && (pi.flight_plan?.arrival == icao || pi.flight_plan?.departure == icao)).OrderBy(pi2 => pi2.callsign).ToList();

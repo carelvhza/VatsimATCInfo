@@ -5,7 +5,7 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <_PublishTargetUrl>H:\Projects\Coding\VatsimATCInfo\VatsimATCInfo\bin\app.publish\</_PublishTargetUrl>
-    <History>True|2021-08-18T20:22:58.4017127Z;True|2021-08-18T22:19:24.7556826+02:00;True|2021-08-18T22:12:30.9156757+02:00;False|2021-08-18T22:11:49.5195190+02:00;True|2021-07-31T14:01:02.8070570+02:00;</History>
+    <History>True|2021-12-14T16:13:36.6258974Z;True|2021-08-18T22:22:58.4017127+02:00;True|2021-08-18T22:19:24.7556826+02:00;True|2021-08-18T22:12:30.9156757+02:00;False|2021-08-18T22:11:49.5195190+02:00;True|2021-07-31T14:01:02.8070570+02:00;</History>
   </PropertyGroup>
   <ItemGroup>
     <File Include="bin/csharp-metar-decoder.dll">
@@ -27,10 +27,10 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
       <publishTime>07/29/2021 17:03:25</publishTime>
     </File>
     <File Include="bin/VatsimATCInfo.dll">
-      <publishTime>08/18/2021 22:22:58</publishTime>
+      <publishTime>12/14/2021 18:13:35</publishTime>
     </File>
     <File Include="bin/VatsimATCInfo.pdb">
-      <publishTime>08/18/2021 22:22:58</publishTime>
+      <publishTime>12/14/2021 18:13:35</publishTime>
     </File>
     <File Include="css/all.min.css">
       <publishTime>03/16/2021 15:15:14</publishTime>
@@ -63,7 +63,7 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
       <publishTime>07/31/2021 08:13:09</publishTime>
     </File>
     <File Include="index.html">
-      <publishTime>08/18/2021 22:11:28</publishTime>
+      <publishTime>12/14/2021 17:20:00</publishTime>
     </File>
     <File Include="Services/vatsim.asmx">
       <publishTime>07/29/2021 14:43:13</publishTime>
@@ -72,7 +72,7 @@ https://go.microsoft.com/fwlink/?LinkID=208121.
       <publishTime>07/29/2021 17:03:25</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>07/31/2021 14:01:01</publishTime>
+      <publishTime>08/19/2021 19:14:40</publishTime>
     </File>
   </ItemGroup>
 </Project>
