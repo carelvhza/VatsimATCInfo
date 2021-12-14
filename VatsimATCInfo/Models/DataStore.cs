@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Web;
 using System.Web.Hosting;
 
 namespace VatsimATCInfo.Models
 {
     public class DataStore
     {
-        public static List<Runway> _runways = new List<Runway>();
-        public static List<AirportData> _airports = new List<AirportData>();
-
+        private static List<AirportData> _airports = new List<AirportData>();
+        private static List<Country> _countries = new List<Country>();
+        private static List<Runway> _runways = new List<Runway>();
 
         public static List<AirportData> GetAirports()
         {
@@ -20,8 +18,83 @@ namespace VatsimATCInfo.Models
 
         public static void LoadData()
         {
+            LoadCountries();
             LoadRunways();
             LoadAirports();
+        }
+
+        private static string _getNumbers(string input)
+        {
+            return new string(input.Where(c => char.IsDigit(c)).ToArray());
+        }
+
+        private static void LoadAirports()
+        {
+            var mainFile = File.ReadAllLines(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "airports_new.dat"));
+            var airportData = new List<AirportData>();
+
+            var c = 0;
+            foreach (var item in mainFile)
+            {
+                c++;
+                var split = item.Split(',');
+                if (split.Length == 10)
+                {
+                    var runwaysForThisIcao = _runways.Where(rw => rw.ICAO == split[4]);
+                    var country = _countries.FirstOrDefault(ct => ct.Code == split[2])?.Name;
+                    if (string.IsNullOrEmpty(country))
+                    {
+                        country = "Unknown";
+                    }
+                    var counter = 0;
+                    airportData.Add(new AirportData()
+                    {
+                        Id = NextNumber(ref counter),
+                        Name = split[0],
+                        ShortName = split[1],
+                        CountryCode = split[2],
+                        IATA = split[3],
+                        ICAO = split[4],
+                        Latitude = double.Parse(split[5]),
+                        Longitude = double.Parse(split[6]),
+                        Altitude = (!string.IsNullOrEmpty(split[7]) ? int.Parse(split[7]) : 0),
+                        Runways = runwaysForThisIcao.ToList(),
+                        Continent = split[8],
+                        Municipality = split[9],
+                        Country = country
+                    });
+                }
+            }
+            _airports = airportData;
+        }
+
+        private static int NextNumber(ref int counter)
+        {
+            counter++;
+            return counter;
+        }
+
+        private static void LoadCountries()
+        {
+            var mainFile = File.ReadAllLines(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "countries.dat"));
+            var countryData = new List<Country>();
+
+            var c = 0;
+            foreach (var item in mainFile)
+            {
+                c++;
+                var split = item.Split(',');
+                if (split.Length == 14)
+                {
+                    countryData.Add(new Country()
+                    {
+                        Code = split[0],
+                        Name = split[1],
+                        Continent = split[2]
+                    });
+                }
+            }
+            _countries = countryData;
         }
 
         private static void LoadRunways()
@@ -43,7 +116,6 @@ namespace VatsimATCInfo.Models
                     int.TryParse(primaryWithoutLetters, out primaryDegrees);
                     int.TryParse(secondaryWithoutLetters, out secondaryDegrees);
 
-
                     runwayData.Add(new Runway()
                     {
                         ICAO = split[0],
@@ -55,43 +127,6 @@ namespace VatsimATCInfo.Models
                 }
             }
             _runways = runwayData;
-        }
-
-        private static void LoadAirports()
-        {
-            var mainFile = File.ReadAllLines(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "airports.dat"));
-            var airportData = new List<AirportData>();            
-
-            var c = 0;
-            foreach (var item in mainFile)
-            {
-                c++;
-                var split = item.Split(',');
-                if (split.Length == 14)
-                {
-                    var runwaysForThisIcao = _runways.Where(rw => rw.ICAO == split[5]);
-
-                    airportData.Add(new AirportData()
-                    {
-                        Id = int.Parse(split[0]),
-                        Name = split[1],
-                        ShortName = split[2],
-                        Country = split[3],
-                        IATA = split[4],
-                        ICAO = split[5],
-                        Latitude = double.Parse(split[6]),
-                        Longitude = double.Parse(split[7]),
-                        Altitude = int.Parse(split[8]),
-                        Runways = runwaysForThisIcao.ToList()
-                    });
-                }
-            }         
-            _airports = airportData;
-        }
-
-        private static string _getNumbers(string input)
-        {
-            return new string(input.Where(c => char.IsDigit(c)).ToArray());
         }
     }
 }

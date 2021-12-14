@@ -17,5 +17,8 @@ namespace VatsimATCInfo.Models
         public double Longitude { get; set; }        
         public int Altitude { get; set; }
         public List<Runway> Runways { get; set; }
+        public string CountryCode { get; set; }
+        public string Municipality { get; set; }
+        public string Continent { get; set; }
     }
 }

@@ -108,6 +108,7 @@
     <Compile Include="Models\AirportData.cs" />
     <Compile Include="Models\AtcData.cs" />
     <Compile Include="Models\DataStore.cs" />
+    <Compile Include="Models\Countries.cs" />
     <Compile Include="Models\Runway.cs" />
     <Compile Include="Models\VatsimData.cs" />
     <Compile Include="vatsim.asmx.cs">

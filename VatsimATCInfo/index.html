@@ -165,14 +165,107 @@
     display:inline;
   }
 
-  .runway-select {
-    width: 60px;
-    display:inline;
-    font-size:0.8rem;
+  .runway-selectors {
+    width: auto;
   }
 
-  .runway-one {   
+  .runway-select {
+    width: 60px;
+    display: inline;
+    font-size: 0.8rem;
   }
+
+  .label-weather-visibility {      
+    text-align:right;
+    display:block;
+  }
+
+  #labelVisibility {
+    float: right;
+    margin-top: 4px;
+    margin-right: 5px;
+  }
+
+  @media (min-width: 700px) {
+    #windowweather {
+      max-width: 350px;
+    }
+  }
+
+  .runway-move {
+    height: 280px;
+    width: 70px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    transition: all ease-in-out 2s;
+  }
+
+  .cloud-few {
+    color: #ccc;
+  }
+
+  .cloud-scattered {
+    color: #999;
+  }
+
+  .cloud-broken {
+    color: #777;
+  }
+
+  .cloud-overcast {
+    color: #555;
+  }
+
+  .runway-one {
+  }
+
+  #cloudList {
+    font-size:1rem; 
+    width: 55%; 
+    display:inline-block;
+  }
+
+  .weather-condition-box {
+    display: inline-block;
+    width: 40%;
+    text-align:center;
+    padding:5px;
+    position:relative;
+    border: #ddd solid 1px;
+    border-radius: 5px;
+  }
+
+  .label-condition {
+    display:block;
+    font-size:smaller;
+    color: #333;
+  }
+
+  .label-special-wind {
+    position:absolute;
+    top:4px;
+    right:2px;;
+
+  }
+
+  .background-clear {
+    background: linear-gradient(27deg, rgba(71,71,71,0) 34%, rgba(35,215,255,1) 94%);
+  }
+
+  .background-partly-cloudy {
+    background: linear-gradient(27deg, rgba(71,71,71,0) 34%, rgba(77,140,154,1) 94%);
+  }
+
+  .background-cloudy {
+    background: linear-gradient(27deg, rgba(71,71,71,0) 24%, rgba(73,85,88,1) 94%);
+  }
+  .background-rain {
+    background: linear-gradient(27deg, rgba(71,71,71,0) 4%, rgba(19, 27, 40,1) 74%);
+  }  
 </style>
 <body>
   <div id="body-global">
@@ -204,6 +297,7 @@
     <div class="progress progress-bar-loader">
       <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width:100%;"></div>
     </div>
+    <div class=".error-message" style="display:none;"></div>
     <div class="container">
       <div class="row" style="margin-top:20px;">
         <!-- Left Col -->
@@ -257,7 +351,7 @@
                     <div class="card-header">
                       Departures
                       <span style="float:right">
-                        <span class="form-check form-switch" style="margin-right: 90px; border-radius: 5px; background: rgba(255,255,255,0.3); padding-left: 40px;">
+                        <span class="form-check form-switch" style="margin-right: 90px; border-radius: 5px; padding-left: 40px;">
                           <label class="form-check-label temp-label-c" for="switchDepsOff" style="width: 100px;">Hide Departed</label>
                           <input class="form-check-input" type="checkbox" id="switchDepsOff">
                         </span>
@@ -305,11 +399,11 @@
         <div id="windowweather" class="col">
           <div class="row">
             <div class="col-lg-12">
-              <div class="card mb-3 ">
+              <div class="card mb-3 " style="border: none;">
                 <span class="card-header text-white bg-primary">
                   <span style="font-size:larger">Weather</span>
                   <span style="float:right">
-                    <span class="form-check form-switch" style="margin-right: 25px; border-radius: 5px; background: rgba(255,255,255,0.3); padding-left: 46px;">
+                    <span class="form-check form-switch" style="margin-right: 25px; border-radius: 5px;  padding-left: 46px;">
                       <label class="form-check-label temp-label-f" for="flewSwitchTemp">°F</label>
                       <label class="form-check-label temp-label-c" for="flewSwitchTemp"> °C</label>
                       <input class="form-check-input" type="checkbox" id="flewSwitchTemp" style="right: 8px;" checked>
@@ -324,30 +418,28 @@
                   <h6 id="rawMetar" class="card-subtitle text-muted mb-0">Waiting for METAR...</h6>
                 </div>
                 <label for="exampleSelect1" class="form-label select-runway ml-2">Runways in Use</label>
-                <div class="runway-selectors ml-2" >
+                <div class="runway-selectors ml-2">
                   <div class="form-group select-runway">
                     <select class="form-select runway-select" id="selectRunway0" style="display:none" data-runway="0">
                       <option>25</option>
-                      <option>07</option>                     
+                      <option>07</option>
                     </select>
                   </div>
                   <div class="form-group select-runway">
                     <select class="form-select runway-select" id="selectRunway1" style="display:none" data-runway="1">
                       <option>26</option>
-                      <option>08</option>                     
+                      <option>08</option>
                     </select>
                   </div>
                   <div class="form-group select-runway">
                     <select class="form-select runway-select" id="selectRunway2" style="display:none" data-runway="2">
                       <option>35</option>
-                      <option>17</option>                      
+                      <option>17</option>
                     </select>
                   </div>
+                  <span id="labelVisibility"><i class="fa fa-eye text-info"></i> <strong id="labelVisibilityValue"></strong></span>
                 </div>
-                <!--<div class="slider-runway-one">
-                  <span class="text-success" style="display:block">RWY <span id="labelRunwayDirection"> 1</span></span>
-                  <input type="range" min="10" max="360" step="10" value="10" class="slider mb-2 form-range " id="sliderRwyOne">
-                </div>-->
+                <div class="card-text label-weather-visibility"></div>             
                 <div style="text-align:center; position:relative">
                   <div class="wind-text">
                     <h5 class="text-primary"><strong id="windLabel"></strong></h5>
@@ -359,15 +451,26 @@
                   <img src="images/windneedle_var.png" class="wind-needle-var" />
                   <img src="images/windneedle_var.png" class="wind-needle-var2" />
                   <img id="runway0" src="images/runway-5.png" class="runway-one" />
-                  <img id="runway0b" src="images/runway-5.png" class="runway-one" />
-                  <img id="runway0c" src="images/runway-5.png" class="runway-one" />
+                  <div id="runway0bmove" class="runway-move">
+                    <img id="runway0b" src="images/runway-5.png" class="runway-one" />
+                  </div>
+                  <div id="runway0cmove" class="runway-move">
+                    <img id="runway0c" src="images/runway-5.png" class="runway-one" />
+                  </div>
                   <img id="runway1" src="images/runway-5.png" class="runway-one" />
-                  <img id="runway1b" src="images/runway-5.png" class="runway-one" />
-                  <img id="runway1c" src="images/runway-5.png" class="runway-one" />
+                  <div id="runway1bmove" class="runway-move">
+                    <img id="runway1b" src="images/runway-5.png" class="runway-one" />
+                  </div>
+                  <div id="runway1cmove" class="runway-move">
+                    <img id="runway1c" src="images/runway-5.png" class="runway-one" />
+                  </div>
                   <img id="runway2" src="images/runway-5.png" class="runway-one" />
-                  <img id="runway2b" src="images/runway-5.png" class="runway-one" />
-                  <img id="runway2c" src="images/runway-5.png" class="runway-one" />
-                  <!--<img src="images/runway-3.png" class="runway-two" />-->
+                  <div id="runway2bmove" class="runway-move">
+                    <img id="runway2b" src="images/runway-5.png" class="runway-one" />
+                  </div>
+                  <div id="runway2cmove" class="runway-move">
+                    <img id="runway2c" src="images/runway-5.png" class="runway-one" />
+                  </div>
                 </div>
                 <div class="card-body">
                   <div class="row" style="font-size:1rem; text-align: center;">
@@ -379,22 +482,24 @@
                     </div>
                   </div>
                   <hr />
-                  <div class="row">
-                    <div class="col-md-12" style=" font-size:1rem;">
-                      <span class="card-text"><sup>Visibility</sup> <strong id="labelVisibility"></strong></span>
+                </div>
+                <div class="card-body">
+                  <h5 class="text-primary">Clouds and Condition <span id="badgeIMCVMC"></span></h5> 
+                  <ul id="cloudList" class="list-group list-group-flush" >
+                  </ul>
+                  <div class="weather-condition-box">
+                    <div id="weatherCondition">
+                      <i class="fa fa-sun text-warning" style="font-size: 2rem; display:block"></i>
+                      <span style="display:block">Clear</span>
                     </div>
                   </div>
-                  <hr />
-                </div>
-
-                <div class="card-body">
-                  <h5 class="text-primary">Clouds</h5>
-                  <ul id="cloudList" class="list-group list-group-flush" style="font-size:1rem;">
-                  </ul>
                 </div>
                 <div class="card-footer text-muted" id="lastUpdate">
                   Waiting for update...
                 </div>
+
+
+              </div>
               </div>
             </div>
           </div>
@@ -410,58 +515,73 @@
           <h5 class="modal-title" id="modalSettingsLabel">Settings</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <fieldset>
-              <legend class="mt-4">Options</legend>
-              <label class="form-label" for="">Scale</label>
-              <div class="form-input">
-                <button id="buttonIncreaseZoom" class="btn btn-sm btn-dark my-2 my-sm-0 ml-1">
-                  <i class="fas fa-plus text-white" style="display: inline; font-size: 1rem;"></i>
-                </button>
-                <button id="buttonDecreaseZoom" class="btn btn-sm btn-dark my-2 my-sm-0 ml-1">
-                  <i class="fas fa-minus text-white" style="display: inline; font-size: 1rem;"></i>
-                </button>
-                <span class="text-success"><span id="labelScale"></span>%</span>
+        <div class="modal-body" style=" padding: 2rem;">
+       
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group">
+                <legend class="mt-4">Panels</legend>
+                <fieldset class="fix-switches">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input window-switches" type="checkbox" id="switchAtis" data-window="atis">
+                    <label class="form-check-label" for="switchAtis">ATIS</label>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input window-switches" type="checkbox" id="switchATC" data-window="atc">
+                    <label class="form-check-label" for="switchATC">Aerodrome ATC</label>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input window-switches" type="checkbox" id="switchNearby" data-window="nearby">
+                    <label class="form-check-label" for="switchNearby">Nearby ATC</label>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input window-switches" type="checkbox" id="switchFiledDeps" data-window="filedDeps">
+                    <label class="form-check-label" for="switchFiledDeps">Filed Departures</label>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input window-switches" type="checkbox" id="switchFiledArrs" data-window="filedArrs">
+                    <label class="form-check-label" for="switchFiledArrs">Filed Arrivals</label>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input window-switches" type="checkbox" id="switchDeps" data-window="deps">
+                    <label class="form-check-label" for="switchDeps">Departures</label>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input window-switches" type="checkbox" id="switchArrs" data-window="arrs">
+                    <label class="form-check-label" for="switchArrs">Arrivals</label>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input window-switches" type="checkbox" id="switchWeather" data-window="weather">
+                    <label class="form-check-label" for="switchWeather">Weather</label>
+                  </div>
+                </fieldset>
               </div>
-            </fieldset>
-          </div>
-          <div class="form-group">
-            <legend class="mt-4">Panels</legend>
-            <fieldset class="fix-switches">
-              <div class="form-check form-switch">
-                <input class="form-check-input window-switches" type="checkbox" id="switchAtis" data-window="atis">
-                <label class="form-check-label" for="switchAtis">ATIS</label>
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group">
+                <legend class="mt-4">UI</legend>
+                <fieldset class="fix-switches">                 
+                  <div class="form-input mb-2">
+                    <span style="font-size: 1.2rem" >Scale</span>
+                    <button id="buttonIncreaseZoom" class="btn btn-sm btn-dark my-2 my-sm-0 ml-1">
+                      <i class="fas fa-plus text-white" style="display: inline; font-size: 1rem;"></i>
+                    </button>
+                    <button id="buttonDecreaseZoom" class="btn btn-sm btn-dark my-2 my-sm-0 ml-1">
+                      <i class="fas fa-minus text-white" style="display: inline; font-size: 1rem;"></i>
+                    </button>
+                    <span class="text-success"><span id="labelScale"></span>%</span>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="switchBackground">
+                    <label class="form-check-label" for="switchBackground">Show background based on weather</label>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="switchDark">
+                    <label class="form-check-label" for="switchDark">Dark background</label>
+                  </div>
+                </fieldset>
               </div>
-              <div class="form-check form-switch">
-                <input class="form-check-input window-switches" type="checkbox" id="switchATC" data-window="atc">
-                <label class="form-check-label" for="switchATC">Aerodrome ATC</label>
-              </div>
-              <div class="form-check form-switch">
-                <input class="form-check-input window-switches" type="checkbox" id="switchNearby" data-window="nearby">
-                <label class="form-check-label" for="switchNearby">Nearby ATC</label>
-              </div>
-              <div class="form-check form-switch">
-                <input class="form-check-input window-switches" type="checkbox" id="switchFiledDeps" data-window="filedDeps">
-                <label class="form-check-label" for="switchFiledDeps">Filed Departures</label>
-              </div>
-              <div class="form-check form-switch">
-                <input class="form-check-input window-switches" type="checkbox" id="switchFiledArrs" data-window="filedArrs">
-                <label class="form-check-label" for="switchFiledArrs">Filed Arrivals</label>
-              </div>
-              <div class="form-check form-switch">
-                <input class="form-check-input window-switches" type="checkbox" id="switchDeps" data-window="deps">
-                <label class="form-check-label" for="switchDeps">Departures</label>
-              </div>
-              <div class="form-check form-switch">
-                <input class="form-check-input window-switches" type="checkbox" id="switchArrs" data-window="arrs">
-                <label class="form-check-label" for="switchArrs">Arrivals</label>
-              </div>
-              <div class="form-check form-switch">
-                <input class="form-check-input window-switches" type="checkbox" id="switchWeather" data-window="weather">
-                <label class="form-check-label" for="switchWeather">Weather</label>
-              </div>
-            </fieldset>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -484,6 +604,9 @@
     var globalWeather = null;
     var keepRunways = false;
     var globalKeepRunways = 0;
+    var globalAirportInfo = null;
+    var globalShowWeatherBackground = true;
+    var globalDarkBackground = false;
 
     $(() => {
       if (!globalIcao || globalIcao === '') {
@@ -504,8 +627,27 @@
       $('#body-global').css('zoom', globalZoom);
       $('#labelScale').html(Math.round(globalZoom * 100));
 
-      setWindows();
+      globalShowWeatherBackground = localStorage.getItem('globalShowWeatherBackground') === 'true';
+      if (globalShowWeatherBackground === null) {
+        globalShowWeatherBackground = true;        
+      }
+      $('#switchBackground').prop('checked', globalShowWeatherBackground);
 
+      globalDarkBackground = localStorage.getItem('globalDarkBackground') === 'true';
+      console.log(globalDarkBackground);
+      if (globalDarkBackground === null) {
+        globalDarkBackground = false;        
+      }
+      $('#switchDark').prop('checked', globalDarkBackground);
+
+      if (globalDarkBackground) {
+        $('body').prop('style', 'background-color: #222;');
+      }
+      else {
+        $('body').prop('style', '');
+      }
+
+      setWindows();
       getDataFromServer();
     });
 
@@ -525,8 +667,16 @@
         type: 'POST',
         success: (data) => {
           globalData = data.d;
-          $('.progress-bar-loader').fadeOut(100);          
-          updateData(data.d);          
+          $('.progress-bar-loader').fadeOut(100);
+          if (data.d.result) {
+            $('.error-message').hide();
+            globalAirportInfo = data.d;
+            updateData(data.d);
+          }
+          else {
+            $('.error-message').html(`Could not load Vatsim data`);
+            $('.error-message').show();
+          }
         }
       });
 
@@ -553,7 +703,8 @@
         return;
       }
       $('#icaoLabel').html(globalIcao);
-      $('#airportName').html(`${data.current_airport_shortname} (${data.current_airport_name})`);
+      let flagString = `<img height="18" width="30" src="images/flags/${data.current_airport_country_code}.svg" title="${data.current_airport_country}" />`
+      $('#airportName').html(`${flagString} ${data.current_airport_shortname} (${data.current_airport_name})`);
       globalAirportHeight = data.airport_height;
 
       // Filter out empty flight plans
@@ -591,8 +742,16 @@
 
     // Events
     $('#loadIcao').click(() => {
-      clearTimeout(globalTick);
-      globalIcao = $('#icaoCode').val().toUpperCase();
+      clearTimeout(globalTick);      
+      if (!$('#icaoCode').val() || $('#icaoCode').val() === '') {
+        $('error-message').show();
+        $('error-message').html('Cannot read icao code, please type a code in and press enter.');
+      }
+      else {
+        $('error-message').hide();        
+        globalIcao = $('#icaoCode').val().toUpperCase();
+      }
+     
       localStorage.setItem('icao', globalIcao);
       keepRunways = false;
       getDataFromServer();
@@ -636,6 +795,24 @@
       $('#labelScale').html(Math.round(globalZoom * 100));
     });
 
+    $('#switchBackground').click((e) => {
+      globalShowWeatherBackground = $(e.target).is(':checked');
+      localStorage.setItem('globalShowWeatherBackground', globalShowWeatherBackground)
+      setCondition();
+    });
+
+    $('#switchDark').click((e) => {
+      globalDarkBackground = $(e.target).is(':checked');
+      localStorage.setItem('globalDarkBackground', globalDarkBackground)
+
+      if (globalDarkBackground) {
+        $('body').prop('style', 'background-color: #222;');
+      }
+      else {
+        $('body').prop('style', '');
+      }
+    })
+        
     $('.window-switches').click((e) => {
       let windowSettings = getWindowSettings();
       let targetWindow = $(e.target).attr('data-window');
@@ -683,15 +860,21 @@
         .css('transform',
           `translate(0px) rotate(${calcDegrees}deg)`)
       keepRunways = true;
-      setRunways(runwayNumber, calcDegrees, globalKeepRunways);
+      let runway = globalAirportInfo.current_airport_runways
+        .filter(a => a.PrimaryDegrees === parseInt(runwayDegrees)
+          || a.SecondaryDegrees === parseInt(runwayDegrees));
+      console.log(runway.length);
+      setRunways(runwayNumber, calcDegrees, runway.length);
     });
 
 
     // Functions
     function updateRunwayDirection(runwaydata) {
+      console.log('Update Runway Direction');
       const unique = [...new Set(runwaydata.map(item => item.PrimaryDegrees))]; // [ 9 ]      
       $('.runway-select').hide();
       $('.runway-one').hide();
+      console.log(unique.length + ' to process');
       for (let i = 0; i < unique.length; i++) {
         let runway = runwaydata.filter(a => a.PrimaryDegrees === unique[i]);
         let runwayCount = runway.length;
@@ -713,6 +896,7 @@
 
         $(`#selectRunway${i}`).html(htmlString);
         $(`#selectRunway${i}`).show();
+        console.log('Is there weather yet?\_')
         if (globalWeather) {
           let currentWind = 0;
           let useNumber = 0
@@ -742,7 +926,7 @@
                 currentWind = currentWind - 360;
 
               /*  console.log(currentWind);*/
-             
+
               useNumber = primary
 
               if (currentWind == topEnd || currentWind == bottomEnd) {
@@ -761,9 +945,14 @@
             $(`#selectRunway${i} > option[value="${useNumber}"]`).prop('selected', true)
 
             setRunways(i, calcDegrees, runwayCount);
-          
-            globalKeepRunways = runwayCount;            
+
+            globalKeepRunways = runwayCount;
           }
+          else {
+            setRunways(i, calcDegrees, runwayCount);
+          }
+        } else {
+          setRunways(i, calcDegrees, runwayCount);
         }
 
         if (i === 2)
@@ -772,8 +961,10 @@
     }
 
     function setRunways(i, calcDegrees, runwayCount) {
+      console.log("Set Runways");
       let y2 = 0;
       let x2 = 0;
+      let toRadian = (Math.PI / 180.0);
       switch (runwayCount) {
         case 1:
           $(`#runway${i}`).show();    
@@ -784,44 +975,66 @@
         case 2:
           $(`#runway${i}`).show();
           $(`#runway${i}b`).show();
-          transformDir = calcDegrees - 90;
+          transformDir = calcDegrees - 90.0;
           if (transformDir < 0)
-            transformDir = transformDir + 360;
-          y2 = 1 + Math.cos(transformDir) * 40;
-          x2 = 1 - Math.sin(transformDir) * 40;
+            transformDir = 360 + transformDir;    
+          
+          x2 = Math.round(Math.sin(transformDir * toRadian) * 40);
+          y2 = -Math.round(Math.cos(transformDir * toRadian) * 40);
+          
 
-          $(`#runway${i}`)
-            .css('transform',
-              `translate(0px) rotate(${calcDegrees}deg)`)
-          $(`#runway${i}b`)
-            .css('transform',
-              `translate(${x2}px,${-y2}px) rotate(${calcDegrees}deg)`);
+          console.log(transformDir);
+          //console.log(y2);
+          console.log(x2);
+          //console.log(x2);
+          console.log(y2);
+
+
+          // RWY a
+          $(`#runway${i}`).css('transform',
+            `translate(0px) rotate(${calcDegrees}deg)`)
+
+          // RWY b
+          $(`#runway${i}b`).css('transform',
+              `rotate(${calcDegrees}deg)`);
+          $(`#runway${i}bmove`).css('transform',
+              `translate(${x2}px,${y2}px) `);
           break;
         case 3:
           $(`#runway${i}`).show();
           $(`#runway${i}b`).show();
           $(`#runway${i}c`).show();
-          $(`#runway${i}`)
-            .css('transform',
-              `translate(0px) rotate(${calcDegrees}deg)`)
-          $(`#runway${i}`).show();
-          $(`#runway${i}b`).show();
-          transformDir = calcDegrees - 90;
+          
+          transformDir = calcDegrees - 90.0;
           if (transformDir < 0)
-            transformDir = transformDir + 360;
-          y2 = 1 + Math.cos(transformDir) * 40;
-          x2 = 1 - Math.sin(transformDir) * 40;
-          $(`#runway${i}`)
-            .css('transform',
-              `translate(0px) rotate(${calcDegrees}deg)`)
-          $(`#runway${i}b`)
-            .css('transform',
-              `translate(${x2}px,${-y2}px) rotate(${calcDegrees}deg)`);
-          y2 = 1 - Math.cos(transformDir) * 40;
-          x2 = 1 + Math.sin(transformDir) * 40;
-          $(`#runway${i}c`)
-            .css('transform',
-              `translate(${x2}px,${-y2}px) rotate(${calcDegrees}deg)`);
+            transformDir = 360 + transformDir;
+    
+
+          x2 = Math.round(Math.sin(transformDir * toRadian) * 40);  
+          y2 = -Math.round(Math.cos(transformDir * toRadian) * 40);
+
+          // RWY a
+          $(`#runway${i}`).css('transform',
+            `translate(0px) rotate(${calcDegrees}deg)`)
+
+          // RWY b
+          $(`#runway${i}b`).css('transform',
+            `rotate(${calcDegrees}deg)`);
+          $(`#runway${i}bmove`).css('transform',
+            `translate(${x2}px,${y2}px) `);
+
+          transformDir = calcDegrees + 90.0;         
+          if (transformDir > 360)
+            transformDir = transformDir - 360;
+
+          x2 = Math.round(Math.sin(transformDir * toRadian) * 40);
+          y2 = -Math.round(Math.cos(transformDir * toRadian) * 40);
+
+          // RWY c
+          $(`#runway${i}c`).css('transform',
+            `rotate(${calcDegrees}deg)`);
+          $(`#runway${i}cmove`).css('transform',
+            `translate(${x2}px,${y2}px) `);
           break;
       }
     }
@@ -931,8 +1144,10 @@
         $('#rawMetar').html(`ICAO code returned no METAR`);
         return;
       }
-
+            
       $('#rawMetar').html(data.RawMetar);
+
+      // Pressure
       if (data.Pressure.ActualUnit === 9) {
         $('#labelQnh').html(data.Pressure.ActualValue);
         $('#labelAlt')
@@ -942,6 +1157,7 @@
         $('#labelQnh').html((data.Pressure.ActualValue * 33.864).toFixed(0));
       }
 
+      // Temperatures
       if ($('#flewSwitchTemp').is(':checked')) {
         $('#labelTemp').html(`${data.AirTemperature.ActualValue} °C`);
         $('#labelDew').html(`${data.DewPointTemperature.ActualValue} °C`);
@@ -955,12 +1171,16 @@
             .toFixed(0)} °F`);
       }
 
+
+      // Visibility
       if (!data.Visibility)
-        $('#labelVisibility').html(">10000m");
+        $('#labelVisibilityValue').html(">10000m");
       else {
-        $('#labelVisibility').html(">10000m");
+        let unit = data.Visibility.PrevailingVisibility.ActualUnit === 7 ? 'ft' : data.Visibility.PrevailingVisibility.ActualUnit === 8 ? 'nm' : 'm';
+        $('#labelVisibilityValue').html(`${data.Visibility.PrevailingVisibility.ActualValue}${unit}`);
       }
 
+      // Wind
       if (!data.SurfaceWind.VariableDirection) {
         const windText = data.SurfaceWind.MeanDirection.ActualValue
 
@@ -1001,20 +1221,147 @@
       } else {
         $('#windGusting').fadeOut(500);
       }
+
+
+      // Clouds
       var cloudString = '';
+      data.Clouds = data.Clouds.sort(
+        (a, b) => (a.BaseHeight.ActualValue > b.BaseHeight.ActualValue) ? -1 : ((b.BaseHeight.ActualValue > a.BaseHeight.ActualValue) ? 1 : 0)
+      );
       if (data.Clouds.length > 0) {
         for (let cloud of data.Clouds) {
           let cloudType = getCloudType(cloud.Amount);
-          cloudString += `<li class="list-group-item"><strong>${cloudType}</strong> ${cloud.BaseHeight.ActualValue}ft</li >`
+          let cloudIcon = getCloudIcon(cloud.Amount);
+          cloudString +=
+            `<li class="list-group-item"> 
+                ${cloudIcon} ${cloud.BaseHeight.ActualValue}<sub class='text-muted'>ft</sub>
+                <sup class="text-muted">${cloudType}</sup>
+            </li>`
         }
-      } else {
-        cloudString = data.Cavok ? 'Clouds and Visibility OK' : 'Clear';
+      } else {       
+        cloudString = '';
       }
       $('#cloudList').html(cloudString);
       $('#lastUpdate')
-        .html(`Last Update: Day ${data.Day} - ${data.Time.replace('UTC', 'z')} for ${data.ICAO} ${data.Status}`);
+        .html(`Last Update: Day ${data.Day} - ${data.Time.replace(' UTC', 'z')} for ${data.ICAO} ${data.Status}`);
+
+      // Condition
+      setCondition();
+     
+     
+
+    // IMC VMC
+      let imcvmc = '<span class="badge bg-success">VMC</span>';
+      if (data.Visibility) {
+        if (
+          (data.Visibility.PrevailingVisibility.ActualUnit === 8 &&
+            data.Visibility.PrevailingVisibility.ActualValue <= 3)
+          || (data.Visibility.PrevailingVisibility.ActualUnit === 7 &&
+            data.Visibility.PrevailingVisibility.ActualValue <= 3000)
+          || (data.Visibility.PrevailingVisibility.ActualUnit === 6 &&
+            data.Visibility.PrevailingVisibility.ActualValue <= 5000)) {
+          imcvmc = '<span class="badge bg-danger">IMC</span>';
+        }
+      }
+      if (data.Clouds.length > 0) {
+        if (data.Clouds.
+          filter(cloud => cloud.BaseHeight.ActualValue <= 500).length > 0) {
+          imcvmc = '<span class="badge bg-danger">IMC</span>';
+        }
+      }
+
+      $('#badgeIMCVMC').html(imcvmc);
+    }
+
+    function setCondition() {
+      // Condition
+      let condition1 = 'Clear';
+      let condition2 = '';
+      if (globalWeather.SurfaceWind.MeanSpeed) {
+        if (globalWeather.SurfaceWind.MeanSpeed.ActualValue > 10) {
+          condition2 = '<span class="badge bg-light text-dark">Wind</span>';
+        }
+      }
+
+      if (globalWeather.Clouds.length > 0) {
+        if (globalWeather.Clouds.filter(cloud => cloud.Amount > 0 && cloud.Amount < 4).length > 0) {
+          condition1 = 'Partly Cloudy';
+        }
+        if (globalWeather.Clouds.filter(cloud => cloud.Amount > 3 && cloud.Amount < 5).length > 0) {
+          condition1 = 'Cloudy';
+        }
+      }
+
+      if (globalWeather.PresentWeather.length > 0) {
+        globalWeather.PresentWeather[0].Types.forEach((cond) => {
+          condition2 += getConditionType(cond);
+        });
+      }
+
+      let weatherIcon = `<i class="fa fa-sun text-warning" style="font-size: 2rem; display:block"></i>`
+
+      if (condition1 === 'Partly Cloudy') {
+        weatherIcon = `<i class="fa fa-cloud-sun cloud-scattered" style="font-size: 2rem; display:block"></i>`
+      }
+
+      if (condition1 === 'Cloudy') {
+        weatherIcon = `<i class="fa fa-cloud cloud-broken" style="font-size: 2rem; display:block"></i>`
+      }
+
+      if (condition2.includes('Rain')) {
+        weatherIcon = `<i class="fa fa-cloud-rain cloud-overcast" style="font-size: 2rem; display:block"></i>`
+      }
+
+      if (condition2.includes('Snow')) {
+        weatherIcon = `<i class="fa fa-snowflake text-info" style="font-size: 2rem; display:block"></i>`
+      }
+
+      if (condition2.includes('Thunderstorm')) {
+        weatherIcon = `<i class="fa fa-cloud-showers-heavy cloud-overcast" style="font-size: 2rem; display:block"></i>`
+      }
+
+      if (condition2.includes('Wind')) {
+        weatherIcon += `<i class="fa fa-wind text-muted label-special-wind" style="font-size: 2rem; display:inline-block"></i>`
+      }
+
+      let weatherStr = ` ${weatherIcon}
+                      <span class="label-condition">${condition1}</span>
+                      <span class="label-condition">${condition2}</span>`
+
+      $('#weatherCondition').html(weatherStr);
 
 
+      // Background condition
+      if (globalShowWeatherBackground) {
+        let bgCondition = '';
+        if (condition1 === 'Clear') {
+          bgCondition = 'background-clear';
+        }
+        if (condition1 === 'Partly Cloudy') {
+          bgCondition = 'background-partly-cloudy'
+        }
+        if (condition1 === 'Cloudy') {
+          bgCondition = 'background-cloudy'
+        }
+
+        if (condition2.includes('Fog')
+          || condition2.includes('Mist')
+          || condition2.includes('Haze')) {
+          bgCondition = 'background-partly-cloudy'
+        }
+
+        if (condition2.includes('Rain')
+          || condition2.includes('Drizzle')
+          || condition2.includes('Thunderstorm')
+          || condition2.includes('Showers')) {
+          bgCondition = 'background-rain'
+        }
+
+        document.querySelector('body').className = bgCondition;
+      }
+      else {
+        document.querySelector('body').className = '';
+      }
     }
 
     function updateDepartures(departures) {
@@ -1068,6 +1415,7 @@
             }
 
             let disabled = (isAirborne) ? 'opacity:0.8;' : '';
+            let flagString = `<img height="10" width="15" src="images/flags/${plane.arr_airport_country_code}.svg" title="${plane.arr_airport_country}" />`
             let cardString =
               ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none; ${disabled}' title="${plane.name}" >
                         <h5 class="time-tag">${iconString}</h5>
@@ -1076,7 +1424,7 @@
                         </h5>
                         <h6 class="card-subtitle text-danger">
                           <sup class="text-muted">To </sup>
-                          <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.arrival}');">${plane.flight_plan.arrival}</strong>
+                          <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.arrival}');">${flagString} ${plane.flight_plan.arrival}</strong>
                           <span class="text-muted airport-name">${plane.arr_airport_shortname} (${plane.arr_airport_name})</span>
                         </h6>
                     </li>`
@@ -1122,6 +1470,7 @@
           }
 
           let disabled = (!isAirborne) ? 'opacity:0.8;' : '';
+          let flagString = `<img height="10" width="15" src="images/flags/${plane.dep_airport_country_code}.svg" title="${plane.dep_airport_country}" />`
           let cardString = ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none; ${disabled}' title="${plane.name}">
                                         <h5 class="time-tag">${iconString}</h5>
                                         <h5 class="card-title"><strong>${plane.callsign}</strong>
@@ -1129,7 +1478,7 @@
                                         </h5>
                                         <h6 class="card-subtitle text-danger">
                                           <sup class="text-muted">From </sup>
-                                          <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.departure}');">${plane.flight_plan.departure}</strong>
+                                          <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.departure}');">${flagString} ${plane.flight_plan.departure}</strong>
                                           <span class="text-muted airport-name">${plane.dep_airport_shortname} (${plane.dep_airport_name})</span>
                                         </h6>
                                     </li>`
@@ -1285,6 +1634,55 @@
           break;
         case 5: return 'VV'
           break;
+      }
+    }
+
+    function getCloudIcon(code) {
+      switch (code) {
+        case 0: return ''
+          break;
+        case 1: return '<i class="fa fa-cloud cloud-few"></i>';
+          break;
+        case 2: return '<i class="fa fa-cloud cloud-scattered"></i><i class="fa fa-cloud cloud-few"></i>';
+          break;
+        case 3: return '<i class="fa fa-cloud cloud-broken"></i><i class="fa fa-cloud  cloud-scattered"></i><i class="fa fa-cloud cloud-broken"></i>'
+          break;
+        case 4: return '<i class="fa fa-cloud cloud-overcast"></i><i class="fa fa-cloud cloud-broken"></i><i class="fa fa-cloud cloud-overcast"></i><i class="fa fa-cloud cloud-scattered"></i>'
+          break;
+        case 5: return 'VV'
+          break;
+      }
+    }
+
+    function getConditionType(code) {
+      switch (code) {
+        case 'SN': return '<span class="badge bg-info">Snow</span>';
+          break;
+        case 'RN': return '<span class="badge bg-success">Rain</span>';
+          break;
+        case 'RA': return '<span class="badge bg-success">Rain</span>';
+          break;
+        case 'DZ': return '<span class="badge bg-success">Drizzle</span>';
+          break;
+        case 'TS': return '<span class="badge bg-primary">Thunderstorm</span>';
+          break;
+        case 'SH': return '<span class="badge bg-primary">Showers</span>';
+          break;
+        case 'FG': return '<span class="badge bg-warning">Fog</span>';
+          break;
+        case 'BR': return '<span class="badge bg-warning">Mist</span>';
+          break;
+        case 'HZ': return '<span class="badge bg-warning">Haze</span>';
+          break;
+        case 'VA': return '<span class="badge bg-warning">Ash</span>';
+          break;
+        case 'FU': return '<span class="badge bg-warning">Smoke</span>';
+          break;
+        case 'SS': return '<span class="badge bg-warning">Sandstorm</span>';
+          break;
+        default: return '<span class="badge bg-info">Unknown</span>';
+          break;
+          
       }
     }
 

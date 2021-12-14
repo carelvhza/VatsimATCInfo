@@ -33,137 +33,184 @@ namespace VatsimATCInfo
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public VatsimData GetData(string icao)
         {
-            icao = icao.ToUpper();     
-            var vatsimData = Communication.DoCall<VatsimData>(DataCalls.VatsimData, icao);
-            var airportData = DataStore.GetAirports();            
-            var currentAirport = airportData.FirstOrDefault(air => air.ICAO == icao);
-            if (currentAirport == null)
+            VatsimData vatsimData = new VatsimData();
+            var airportData = DataStore.GetAirports();
+            if (string.IsNullOrEmpty(icao))
             {
-                return null;
-            }            
-
-            vatsimData.current_airport_name = currentAirport.Name;
-            vatsimData.current_airport_shortname = currentAirport.ShortName;
-            vatsimData.current_airport_country = currentAirport.Country;
-            vatsimData.airport_height = currentAirport.Altitude;
-            vatsimData.current_airport_runways = currentAirport.Runways;
-            vatsimData.pilots = vatsimData.pilots.Where(pi => pi.flight_plan != null && (pi.flight_plan?.arrival == icao || pi.flight_plan?.departure == icao)).OrderBy(pi2 => pi2.callsign).ToList();
-
-            foreach (var pilot in vatsimData.pilots.Where(a => a.flight_plan != null))
-            {
-                var depAirport = airportData.FirstOrDefault(arp => arp.ICAO == pilot.flight_plan.departure);
-                var arrAirport = airportData.FirstOrDefault(arp => arp.ICAO == pilot.flight_plan.arrival);
-
-                if (depAirport != null && arrAirport != null)
+                return new VatsimData()
                 {
-                    var planeCoord = new GeoCoordinate(pilot.latitude, pilot.longitude);
+                    result = false,
+                    message = "Invalid icao"
+                };
 
-                    var airportCoord = new GeoCoordinate(depAirport.Latitude, depAirport.Longitude);
-                    var distance = planeCoord.GetDistanceTo(airportCoord);
-                    pilot.distance_from_dep = distance;
-                    pilot.dep_airport_name = depAirport.Name;
-                    pilot.dep_airport_shortname = depAirport.ShortName;
-                    pilot.dep_airport_country = depAirport.Country; 
-
-                    airportCoord = new GeoCoordinate(arrAirport.Latitude, arrAirport.Longitude);
-                    distance = planeCoord.GetDistanceTo(airportCoord);
-                    pilot.distance_to_arr = distance;
-                    pilot.arr_airport_name = arrAirport.Name;
-                    pilot.arr_airport_shortname = arrAirport.ShortName;
-                    pilot.arr_airport_country = arrAirport.Country;
-                    var flightType = (pilot.flight_plan.arrival == icao) ? 2 : (pilot.flight_plan.departure == icao) ? 1 : 0;
-
-                    if (pilot.distance_from_dep > 6000 && pilot.distance_to_arr > 6000 && pilot.groundspeed > 40)
-                    {
-                        pilot.status = "Airborne";
-                        pilot.sort_order = 3;
-                    }
-                    else if (pilot.distance_from_dep <= 6000 && pilot.altitude <= depAirport.Altitude + 10 && pilot.groundspeed > 0 && pilot.groundspeed < 40)
-                    {
-                        pilot.status = "Taxi Out";
-                        pilot.sort_order = (flightType == 1) ? 1 : 5;
-                    }
-                    else if (pilot.distance_from_dep <= 6000 && pilot.altitude > depAirport.Altitude + 10 && pilot.groundspeed > 40)
-                    {
-                        pilot.status = "Departing";
-                        pilot.sort_order = (flightType == 1) ? 2 : 4;
-                    }
-                    else if (pilot.distance_to_arr <= 55500 && pilot.groundspeed > 40 && pilot.altitude > arrAirport.Altitude + 10)
-                    {
-                        pilot.status = "Arriving";
-                        pilot.sort_order = (flightType == 1) ? 4 : 2;
-                    }
-                    else if (pilot.distance_to_arr <= 6000 && pilot.altitude <= arrAirport.Altitude + 10 && pilot.groundspeed < 40 && pilot.groundspeed != 0)
-                    {
-                        pilot.status = "Taxi In";
-                        pilot.sort_order = (flightType == 1) ? 5 : 1;
-                    }
-                    else if (pilot.distance_to_arr <= 6000 && pilot.altitude <= arrAirport.Altitude + 10 && pilot.groundspeed == 0)
-                    {
-                        pilot.status = "Arrived";
-                        pilot.sort_order = (flightType == 1) ? 6 : 0;
-                    }
-                    else
-                    {
-                        pilot.status = "Preparing";
-                        pilot.sort_order = (flightType == 1) ? 0 : 6;
-                    }
-
-                    if (pilot.distance_to_arr <= 55500 && pilot.groundspeed > 40 && pilot.altitude > arrAirport.Altitude + 10)
-                    {
-                        pilot.status = "Arriving";
-                        pilot.sort_order = (flightType == 1) ? 4 : 2;
-                    }
-
-                    if (pilot.groundspeed > 0)
-                    {
-                        var kph = pilot.groundspeed * 1.852d;
-                        var mpm = kph * 16.666d;
-                        var minutes = pilot.distance_to_arr / mpm;
-
-                        if (minutes > 0)
-                        {
-                            var targetTime = DateTime.UtcNow.AddMinutes(minutes);
-                            pilot.calculated_arrival_time = int.Parse(targetTime.ToString("HHmm"));
-                        }
-                        else pilot.calculated_arrival_time = 0000;
-                    }
-                    else
-                    {
-                        pilot.calculated_arrival_time = 0000;
-                    }
+            }
+            icao = icao.ToUpper();
+            try
+            {
+                vatsimData = Communication.DoCall<VatsimData>(DataCalls.VatsimData, icao);
+            }
+            catch (Exception ex)
+            {
+                return new VatsimData()
+                {
+                    result = false,
+                    message = ex.Message
+                };
+            }
+            try
+            {
+                vatsimData.result = true;
+                
+                var currentAirport = airportData.FirstOrDefault(air => air.ICAO == icao);
+                if (currentAirport == null)
+                {
+                    return null;
                 }
-                else
+
+                vatsimData.current_airport_name = currentAirport.Name;
+                vatsimData.current_airport_shortname = currentAirport.ShortName;
+                vatsimData.current_airport_country = currentAirport.Country;
+                vatsimData.current_airport_country_code = currentAirport.CountryCode;
+                vatsimData.airport_height = currentAirport.Altitude;
+                vatsimData.current_airport_runways = currentAirport.Runways;
+                vatsimData.pilots = vatsimData.pilots.Where(pi => pi.flight_plan != null && (pi.flight_plan?.arrival == icao || pi.flight_plan?.departure == icao)).OrderBy(pi2 => pi2.callsign).ToList();
+
+                foreach (var pilot in vatsimData.pilots.Where(a => a.flight_plan != null))
                 {
-                    pilot.status = "Invalid aiport ICAO";
+                    var depAirport = airportData.FirstOrDefault(arp => arp.ICAO == pilot.flight_plan.departure);
+                    var arrAirport = airportData.FirstOrDefault(arp => arp.ICAO == pilot.flight_plan.arrival);
+
+                    if (depAirport != null && arrAirport != null)
+                    {
+                        var planeCoord = new GeoCoordinate(pilot.latitude, pilot.longitude);
+
+                        var airportCoord = new GeoCoordinate(depAirport.Latitude, depAirport.Longitude);
+                        var distance = planeCoord.GetDistanceTo(airportCoord);
+                        pilot.distance_from_dep = distance;
+                        pilot.dep_airport_name = depAirport.Name;
+                        pilot.dep_airport_shortname = depAirport.ShortName;
+                        pilot.dep_airport_country = depAirport.Country;
+                        pilot.dep_airport_country_code = depAirport.CountryCode;
+
+                        airportCoord = new GeoCoordinate(arrAirport.Latitude, arrAirport.Longitude);
+                        distance = planeCoord.GetDistanceTo(airportCoord);
+                        pilot.distance_to_arr = distance;
+                        pilot.arr_airport_name = arrAirport.Name;
+                        pilot.arr_airport_shortname = arrAirport.ShortName;
+                        pilot.arr_airport_country = arrAirport.Country;
+                        pilot.arr_airport_country_code = arrAirport.CountryCode;
+                        var flightType = (pilot.flight_plan.arrival == icao) ? 2 : (pilot.flight_plan.departure == icao) ? 1 : 0;
+
+                        if (pilot.distance_from_dep > 6000 && pilot.distance_to_arr > 6000 && pilot.groundspeed > 40)
+                        {
+                            pilot.status = "Airborne";
+                            pilot.sort_order = 3;
+                        }
+                        else if (pilot.distance_from_dep <= 6000 && pilot.altitude <= depAirport.Altitude + 10 && pilot.groundspeed > 0 && pilot.groundspeed < 40)
+                        {
+                            pilot.status = "Taxi Out";
+                            pilot.sort_order = (flightType == 1) ? 1 : 5;
+                        }
+                        else if (pilot.distance_from_dep <= 6000 && pilot.altitude > depAirport.Altitude + 10 && pilot.groundspeed > 40)
+                        {
+                            pilot.status = "Departing";
+                            pilot.sort_order = (flightType == 1) ? 2 : 4;
+                        }
+                        else if (pilot.distance_to_arr <= 55500 && pilot.groundspeed > 40 && pilot.altitude > arrAirport.Altitude + 10)
+                        {
+                            pilot.status = "Arriving";
+                            pilot.sort_order = (flightType == 1) ? 4 : 2;
+                        }
+                        else if (pilot.distance_to_arr <= 6000 && pilot.altitude <= arrAirport.Altitude + 10 && pilot.groundspeed < 40 && pilot.groundspeed != 0)
+                        {
+                            pilot.status = "Taxi In";
+                            pilot.sort_order = (flightType == 1) ? 5 : 1;
+                        }
+                        else if (pilot.distance_to_arr <= 6000 && pilot.altitude <= arrAirport.Altitude + 10 && pilot.groundspeed == 0)
+                        {
+                            pilot.status = "Arrived";
+                            pilot.sort_order = (flightType == 1) ? 6 : 0;
+                        }
+                        else
+                        {
+                            pilot.status = "Preparing";
+                            pilot.sort_order = (flightType == 1) ? 0 : 6;
+                        }
+
+                        if (pilot.distance_to_arr <= 55500 && pilot.groundspeed > 40 && pilot.altitude > arrAirport.Altitude + 10)
+                        {
+                            pilot.status = "Arriving";
+                            pilot.sort_order = (flightType == 1) ? 4 : 2;
+                        }
+
+                        if (pilot.groundspeed > 0)
+                        {
+                            var kph = pilot.groundspeed * 1.852d;
+                            var mpm = kph * 16.666d;
+                            var minutes = pilot.distance_to_arr / mpm;
+
+                            if (minutes > 0)
+                            {
+                                var targetTime = DateTime.UtcNow.AddMinutes(minutes);
+                                pilot.calculated_arrival_time = int.Parse(targetTime.ToString("HHmm"));
+                            }
+                            else pilot.calculated_arrival_time = 0000;
+                        }
+                        else
+                        {
+                            pilot.calculated_arrival_time = 0000;
+                        }
+                    }
+                    else
+                    {
+                        pilot.status = "Invalid aiport ICAO";
+                    }
                 }
             }
-
-            
-            vatsimData.departures = vatsimData.pilots.Where(pi => pi.flight_plan != null && pi.flight_plan.departure == icao).ToList();
-            vatsimData.departures = vatsimData.departures.OrderBy(pi => pi.sort_order).ThenBy(pi2 => pi2.flight_plan.deptime).ThenBy(pi3 => pi3.calculated_arrival_time).ToList();
-            
-            vatsimData.arrivals = vatsimData.pilots.Where(pi => pi.flight_plan != null && pi.flight_plan.arrival == icao).ToList();
-            vatsimData.arrivals = vatsimData.arrivals.OrderBy(pi => pi.sort_order).ThenBy(pi2 => pi2.calculated_arrival_time).ThenBy(pi3 => pi3.flight_plan.deptime).ToList();
-
-
-            var ap = airportData.FirstOrDefault(air => air.ICAO == icao);
-            var transceivers = _getTransceivers();
-            if (ap != null)
+            catch (Exception ex)
             {
-                var airportCoords = new GeoCoordinate(ap.Latitude, ap.Longitude);
-
-                foreach (var controller in vatsimData.controllers)
+                return new VatsimData()
                 {
-                    var tr = transceivers.FirstOrDefault(tra => tra.callsign == controller.callsign);
-                    if (tr != null && tr?.transceivers != null && tr.transceivers.Any()) 
-                    {
-                        var atcCoords = new GeoCoordinate(tr.transceivers[0].latDeg, tr.transceivers[0].lonDeg);
-                        controller.distance_from_airport = airportCoords.GetDistanceTo(atcCoords);
-                    }
-                }
+                    result = false,
+                    message = "After load: " + ex.Message
+                };
+            }
 
-                vatsimData.controllers = vatsimData.controllers.Where(a => a.distance_from_airport < 200000 && a.distance_from_airport != 0).OrderBy(a2 => a2.callsign).ToList();
+            try
+            {
+                vatsimData.departures = vatsimData.pilots.Where(pi => pi.flight_plan != null && pi.flight_plan.departure == icao).ToList();
+                vatsimData.departures = vatsimData.departures.OrderBy(pi => pi.sort_order).ThenBy(pi2 => pi2.flight_plan.deptime).ThenBy(pi3 => pi3.calculated_arrival_time).ToList();
+
+                vatsimData.arrivals = vatsimData.pilots.Where(pi => pi.flight_plan != null && pi.flight_plan.arrival == icao).ToList();
+                vatsimData.arrivals = vatsimData.arrivals.OrderBy(pi => pi.sort_order).ThenBy(pi2 => pi2.calculated_arrival_time).ThenBy(pi3 => pi3.flight_plan.deptime).ToList();
+
+
+                var ap = airportData.FirstOrDefault(air => air.ICAO == icao);
+                var transceivers = _getTransceivers();
+                if (ap != null)
+                {
+                    var airportCoords = new GeoCoordinate(ap.Latitude, ap.Longitude);
+
+                    foreach (var controller in vatsimData.controllers)
+                    {
+                        var tr = transceivers.FirstOrDefault(tra => tra.callsign == controller.callsign);
+                        if (tr != null && tr?.transceivers != null && tr.transceivers.Any())
+                        {
+                            var atcCoords = new GeoCoordinate(tr.transceivers[0].latDeg, tr.transceivers[0].lonDeg);
+                            controller.distance_from_airport = airportCoords.GetDistanceTo(atcCoords);
+                        }
+                    }
+
+                    vatsimData.controllers = vatsimData.controllers.Where(a => a.distance_from_airport < 200000 && a.distance_from_airport != 0).OrderBy(a2 => a2.callsign).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                return new VatsimData()
+                {
+                    result = false,
+                    message = "After process: " + ex.Message
+                };
             }
             return vatsimData;
         }
@@ -181,8 +228,8 @@ namespace VatsimATCInfo
             }
             var metar = MetarDecoder.ParseWithMode(response.Content);
             return metar;
-        }     
-        
+        }
+
         private List<RadioSource> _getTransceivers()
         {
             var client = new RestClient("https://data.vatsim.net/");
