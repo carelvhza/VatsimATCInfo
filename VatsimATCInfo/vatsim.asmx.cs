@@ -15,6 +15,7 @@ using System.Device.Location;
 using System.Web.Hosting;
 using VatsimATCInfo.Helpers;
 using static VatsimATCInfo.Helpers.MainEnums;
+using Boerman.OpenAip;
 
 namespace VatsimATCInfo
 {
@@ -75,6 +76,34 @@ namespace VatsimATCInfo
                 vatsimData.current_airport_lon = currentAirport.Longitude;
                 vatsimData.airport_height = currentAirport.Altitude;
                 vatsimData.current_airport_runways = currentAirport.Runways;
+
+                Airspace airspace = DataStore.GetAirspace(currentAirport.CountryCode, currentAirport.ShortName, "CTLZ");
+
+                if (airspace != null)
+                {
+                    List<double[]> convertedCoords = new List<double[]>();
+                    try
+                    {
+                        foreach (var point in airspace.Polygon.Coordinates)
+                        {
+                            double[] coords = new double[2];
+                            coords[0] = point.Y;
+                            coords[1] = point.X;
+                            convertedCoords.Add(coords);
+                        }
+
+                        vatsimData.current_airport_airspace = new AirportAirspace()
+                        {
+                            Id = airspace.Id,
+                            Name = airspace.Name,
+                            Category = airspace.Category,
+                            Polygon = convertedCoords
+                        };
+                    } catch (Exception ex)
+                    {
+
+                    }
+                }
                 vatsimData.pilots = vatsimData.pilots.Where(pi => pi.flight_plan != null && (pi.flight_plan?.arrival == icao || pi.flight_plan?.departure == icao)).OrderBy(pi2 => pi2.callsign).ToList();
 
                 foreach (var pilot in vatsimData.pilots.Where(a => a.flight_plan != null))
@@ -87,6 +116,11 @@ namespace VatsimATCInfo
                         var planeCoord = new GeoCoordinate(pilot.latitude, pilot.longitude);
 
                         var airportCoord = new GeoCoordinate(depAirport.Latitude, depAirport.Longitude);
+
+                        var airlineCode = (pilot.callsign.Length >= 3) ? pilot.callsign.Substring(0, 3) : pilot.callsign;
+                        pilot.airline_data = DataStore.GetAirline(airlineCode);
+                        
+
                         var distance = planeCoord.GetDistanceTo(airportCoord);
                         pilot.distance_from_dep = distance;
                         pilot.dep_airport_name = depAirport.Name;
@@ -241,6 +275,13 @@ namespace VatsimATCInfo
             var transceivers = JsonConvert.DeserializeObject<List<RadioSource>>(response.Content);
 
             return transceivers;
+        }
+
+        [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public List<Airspace> GetAirspaces()
+        {
+            return DataStore.GetAirspaces();
         }
 
     }

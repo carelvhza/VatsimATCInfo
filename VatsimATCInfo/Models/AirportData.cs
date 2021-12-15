@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Boerman.OpenAip;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -20,5 +21,6 @@ namespace VatsimATCInfo.Models
         public string CountryCode { get; set; }
         public string Municipality { get; set; }
         public string Continent { get; set; }
+        public Airspace CTR { get; set; }
     }
 }

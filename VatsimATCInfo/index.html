@@ -251,7 +251,7 @@
     position: absolute;
     top: 4px;
     right: 2px;
-    ;
+    
   }
 
   .background-clear {
@@ -273,13 +273,13 @@
   #mapLeaflet {
     height: 250px;
     max-width: 500px;
-    margin-bottom: 10px;   
+    margin-bottom: 10px;
   }
 
   #windowmap {
     width: 50%;
     display: none;
-    position:relative;
+    position: relative;
   }
 
   #zoomView {
@@ -292,13 +292,42 @@
 
   #windowLeftSide {
     overflow-y: auto;
-    height: calc(100vh - 70px);
+    height: calc(100vh - 170px);
   }
 
   .leaflet-overlay-pane {
-    z-index: 900;
+    /*z-index: 00;*/
   }
 
+  .tooltip-callsigns {
+    font-size:smaller;
+  }
+
+  .info-box {
+    border: #ddd solid 1px;
+    border-radius: 5px;
+    padding:3px;
+  }
+
+  .floating-window-center{
+    position:absolute;
+    left:0;
+    right:0;
+    top:0;
+    width: 100px;
+    height:100px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  .background-logo {
+    background-repeat: no-repeat !important;
+    background-color: #fff !important;
+    background-size:  60px 30px !important;
+    background-position-x: 95% !important;
+    background-position-y: 24px !important;    
+    background-clip: padding-box !important;
+  }
 
 </style>
 <body>
@@ -354,14 +383,14 @@
 
           </div>
           <div class="row">
-            <div id="windowatc" class="col" >
+            <div id="windowatc" class="col">
               <div class="card text-white bg-info mb-3" style="max-width: 100%;">
                 <div class="card-header">Aerodrome ATC</div>
                 <div id="atcList" class="card-body" style="font-size: smaller;">
                 </div>
               </div>
             </div>
-            <div id="windownearby" class="col" >
+            <div id="windownearby" class="col">
               <div class="card text-white bg-info mb-3" style="max-width: 100%;">
                 <div class="card-header">Nearby ATC and Observers</div>
                 <div id="atcClosebyList" class="card-body" style="font-size: smaller;">
@@ -625,1235 +654,1357 @@
     </div>
   </div>
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="library/leaflet/leaflet.js"></script>
-  <script src="library/leaflet/plugins/leaflet.rotatedMarker.js"></script>
-  <script>
-    var globalIcao = localStorage.getItem('icao');
-    var globalAirportHeight = 5558;
-    var url = window.location.host;
-    var uri = `https://${window.location.host}${window.location.pathname}/vatsim.asmx`;
-    var globalTick;
-    var globalData;
-    var globalZoom = 1.0;
-    var globalWeather = null;
-    var keepRunways = false;
-    var globalKeepRunways = 0;
-    var globalAirportInfo = null;
-    var globalShowWeatherBackground = true;
-    var globalDarkBackground = false;
-    var map = null;
-    var refresh = false;
-    var leafletMarkers = null;
-    var aipMap = null;
+  <div class="modal fade" id="modalAircraft" tabindex="-1" aria-labelledby="modalAircraft" aria-hidden="true" style="zoom: inherit">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white" style="height:42px; padding:3px; padding-left:10px;">
+          <h3 class="modal-title" id="modalAircraftLabel"></h3>
+          <h3 style="padding:5px;float:right"><i class="fas fa-plane text-primary"></i> Airborne</h3>
+          <!--<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>-->
+        </div>
+        <div class="modal-body" style=" padding: 1rem;">
+          <div class="row">
+            <div class="col-sm-4">
+              <p class="text-info"><i class="fa fa-plane-departure"></i> Departure</p>
+              <img height="30" src="images/flags/za.svg" title="South Africa" /><br />
+              <h5 class="text-success" style="margin:4px; font-weight:bold">FACT <span class="text-muted">Cape Town</span></h5>
+             
+            </div>
+            <div class="col-sm-4" style="text-align:center">
+              <div>
+                <span class="" style="font-weight:bold">Enroute</span><br />
+                <span>11h13</span><br />
+                <span class="" style="font-weight:bold">ETA</span><br />
+                <span>18:32z</span>
+              </div>
+            </div>
+            <div class="col-sm-4" style="text-align:right;">
+              <p class="text-info"><i class="fa fa-plane-arrival"></i> Arrival</p>
+              <img height="30" src="images/flags/gb.svg" title="United Kingdom" /><br />
+              <h5 class="text-success" style="margin:4px; font-weight:bold">EGLL <span class="text-muted">London</span></h5>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="info-box">
+                <span class="text-info" style="font-size:larger"><i class="fa fa-route"></i> Route</span>
+                <p>OKTE1C OKTED DCT EPNET/N0479F350 DCT 42S030E/N0477F340 48S040E/N0477F330 50S050E/N0476F350 52S060E 52S070E 52S080E 52S090E 50S100E 48S110E 46S120E/N0475F370 44S130E 40S140E DCT ML H129 DOSEL Y59 RIVET RIVET3</p>
+              </div>
+            </div>
+          </div>
+          <div class="row mt-1">
+            <div class="col-sm-12">
+              <div class="info-box">
+                <span class="text-info" style="font-size:larger"><i class="fa fa-sticky-note"></i> Remarks</span>
+                <p>PBN/A1B1D1O1S2 NAV/RNVD1E2A1 RNP2 DAT/CPDLCX 1FANSP2PDC SUR/260B RSP180 DOF/211215 REG/GYMML EET/FAJO0042 YMMM0446 SEL/BJKL CODE/4007EE OPR/BAW ORGN/EGLLBAWH PER/D RVR/075 RMK/LAHSO NOT AUTHORISED TCAS DSP CTC EGLLBAWC LHRWYBA /V/</p>
+              </div>
+            </div>
+          </div>
 
-    $(() => {
-      if (!globalIcao || globalIcao === '') {
-        globalIcao = 'FAOR';
-      }
-      let current = localStorage.getItem('temptype');
-      if (!current || current === '') {
-        current = true;
-      }
-      $('#flewSwitchTemp').prop('checked', (current == 'true'));
-
-      let hideDeps = localStorage.getItem('hideDeps');
-      $('#switchDepsOff').prop('checked', (hideDeps == 'true'));
-      globalZoom = localStorage.getItem('globalZoom');
-      if (!globalZoom || isNaN(globalZoom)) {
-        globalZoom = 1.0;
-      }
-      $('#body-global').css('zoom', globalZoom);
-      $('#labelScale').html(Math.round(globalZoom * 100));
-
-      globalShowWeatherBackground = localStorage.getItem('globalShowWeatherBackground') === 'true';
-      if (globalShowWeatherBackground === null) {
-        globalShowWeatherBackground = true;
-      }
-      $('#switchBackground').prop('checked', globalShowWeatherBackground);
-
-      globalDarkBackground = localStorage.getItem('globalDarkBackground') === 'true';
-      if (globalDarkBackground === null) {
-        globalDarkBackground = false;
-      }
-      $('#switchDark').prop('checked', globalDarkBackground);
-
-      if (globalDarkBackground) {
-        $('body').prop('style', 'background-color: #222;');
-      }
-      else {
-        $('body').prop('style', '');
-      }
-
-      setWindows();
-      getDataFromServer();
-    });
-
-    function getDataFromServer() {
-      $('.progress-bar-loader').fadeIn(100);
-      $('.progress-bar-loader2').fadeIn(100);
-
-      const sendData = {
-        icao: globalIcao
-      }
-
-      // Vatsim data
-      $.ajax(uri + '/GetData', {
-        dataType: 'json',
-        data: JSON.stringify(sendData),
-        contentType: "application/json; charset=utf-8",
-        type: 'POST',
-        success: (data) => {
-          globalData = data.d;
-          $('.progress-bar-loader').fadeOut(100);
-          if (data.d.result) {
-            $('.error-message').hide();
-            globalAirportInfo = data.d;
-            updateData(data.d);
-          }
-          else {
-            $('.error-message').html(`Could not load Vatsim data`);
-            $('.error-message').show();
-          }
-        }
-      });
-
-      // Weather data
-      $.ajax(uri + '/GetMetar', {
-        dataType: 'json',
-        data: JSON.stringify(sendData),
-        contentType: "application/json; charset=utf-8",
-        type: 'POST',
-        success: (data) => {
-          $('.progress-bar-loader2').fadeOut(100);
-          globalWeather = data.d
-          updateMetar(data.d);
-        }
-      });
-
-      globalTick = setTimeout(() => { getDataFromServer(); }, 60000);
-    }
-
-    function updateData(data) {
-      if (data === null) {
-        $('#icaoLabel').html(globalIcao);
-        $('#airportName').html("ICAO code not found in database");
-        return;
-      }
-      $('#icaoLabel').html(globalIcao);
-      let flagString = `<img height="18" width="30" src="images/flags/${data.current_airport_country_code}.svg" title="${data.current_airport_country}" />`
-      $('#airportName').html(`${flagString} ${data.current_airport_shortname} (${data.current_airport_name})`);
-      globalAirportHeight = data.airport_height;
-
-      // Filter out empty flight plans
-      const preFlightPlanPilots = data.prefiles
-        .filter(pi => pi.flight_plan !== null);
-
-      const filedDepartures = preFlightPlanPilots
-        .filter(pi => pi.flight_plan.departure === globalIcao)
-        .sort((a, b) => { return a > b; });
-
-      const filedArrivals = preFlightPlanPilots
-        .filter(pi => pi.flight_plan.arrival === globalIcao)
-        .sort((a, b) => { return a > b; });
-
-      const aerodromeATC = data.controllers
-        .filter(co => co.callsign.includes(globalIcao)
-          && co.frequency !== '199.998');
-
-      const otherATC = data.controllers
-        .filter(co => !co.callsign.includes(globalIcao)
-          && co.frequency !== '199.998');
-      updateDepartures(data.departures);
-      updateArrivals(data.arrivals);
-      updateFiledData(filedDepartures, filedArrivals);
-      updateAtcData(aerodromeATC, otherATC)
-      updateAtis(data.atis.filter(a => a.callsign.includes(globalIcao)));
-
-      if (!keepRunways)
-        updateRunwayDirection(data.current_airport_runways);
-
-      if (!refresh) {
-        redrawMap(data);
-      }
-
-      redrawMarkers(data);
-    }
-
-
-
-    // Events
-    $('#loadIcao').click(() => {
-      clearTimeout(globalTick);
-      if (!$('#icaoCode').val() || $('#icaoCode').val() === '') {
-        $('error-message').show();
-        $('error-message').html('Cannot read icao code, please type a code in and press enter.');
-      }
-      else {
-        $('error-message').hide();
-        globalIcao = $('#icaoCode').val().toUpperCase();
-      }
-
-      localStorage.setItem('icao', globalIcao);
-      keepRunways = false;
-      refresh = false;
-      getDataFromServer();
-    });
-
-    $('#flewSwitchTemp').change((e) => {
-      switchTempType($(e.target).is(':checked'));
-    });
-
-    $('#switchDepsOff').change((e) => {
-      updateDepartures(globalData.departures);
-      localStorage.setItem('hideDeps', $(e.target).is(':checked'));
-    });
-
-    $('#icaoCode').keypress((e) => {
-      var key = e.which;
-      if (key == 13) {
-        $('#loadIcao').click();
-        return false;
-      }
-    });
-
-    $('#buttonIncreaseZoom').click(() => {
-      globalZoom += 0.1;
-      if (globalZoom > 1.7) {
-        globalZoom = 1.7;
-      }
-      $('#body-global').css('zoom', globalZoom);
-      localStorage.setItem('globalZoom', globalZoom);
-      $('#labelScale').html(Math.round(globalZoom * 100));
-    });
-
-    $('#buttonDecreaseZoom').click(() => {
-
-      globalZoom -= 0.1;
-      if (globalZoom < 0.5) {
-        globalZoom = 0.5;
-      }
-      $('#body-global').css('zoom', globalZoom);
-      localStorage.setItem('globalZoom', globalZoom);
-      $('#labelScale').html(Math.round(globalZoom * 100));
-    });
-
-    $('#switchBackground').click((e) => {
-      globalShowWeatherBackground = $(e.target).is(':checked');
-      localStorage.setItem('globalShowWeatherBackground', globalShowWeatherBackground)
-      setCondition();
-    });
-
-    $('#switchDark').click((e) => {
-      globalDarkBackground = $(e.target).is(':checked');
-      localStorage.setItem('globalDarkBackground', globalDarkBackground)
-
-      if (globalDarkBackground) {
-        $('body').prop('style', 'background-color: #222;');
-      }
-      else {
-        $('body').prop('style', '');
-      }
-    })
-
-    $('.window-switches').click((e) => {
-      let windowSettings = getWindowSettings();
-      let targetWindow = $(e.target).attr('data-window');
-      let isChecked = $(e.target).is(':checked');
-      eval(`windowSettings.${targetWindow} = isChecked ? true : false`);
-      if (isChecked) {
-        eval(`$('#window${targetWindow}').show();`)
-      }
-      else {
-        eval(`$('#window${targetWindow}').hide();`)
-      }
-      setWindowSettings(windowSettings);
-
-      if (targetWindow === 'map' && isChecked) {
-        redrawMap(globalAirportInfo, true);
-      }
-
-      if (
-        !windowSettings.atis
-        && !windowSettings.nearby
-        && !windowSettings.filedDeps
-        && !windowSettings.filedArrs
-        && !windowSettings.deps
-        && !windowSettings.arrs
-        && !windowSettings.atc
-        && !windowSettings.map
-      ) {
-        $('#windowLeftSide').hide();
-      }
-      else {
-        $('#windowLeftSide').show();
-      }
-    });
-
-    $('.runway-select').change((e) => {
-      let runwayNumber = $(e.target).attr('data-runway');
-      let runwayDegrees = $(e.target).prop('value');
-      let calcDegrees = runwayDegrees * 10;
-      $(`#runway${runwayNumber}`)
-        .css('transform',
-          `translate(0px) rotate(${calcDegrees}deg)`)
-      keepRunways = true;
-      let runway = globalAirportInfo.current_airport_runways
-        .filter(a => a.PrimaryDegrees === parseInt(runwayDegrees)
-          || a.SecondaryDegrees === parseInt(runwayDegrees));
-      setRunways(runwayNumber, calcDegrees, runway.length);
-    });
-
-    $('#zoomView').click(() => {
-      let lat = globalAirportInfo.current_airport_lat;
-      let lon = globalAirportInfo.current_airport_lon;
-     
-      if (map.getZoom() === 9)
-        //redrawMap(globalAirportInfo, true, 12)
-        map.setZoom(12);
-      else
-        map.setZoom(9);
-        //redrawMap(globalAirportInfo, true, 9)
-    })
-
-
-    // Functions
-    function redrawMap(data, doMarkers, zoom) {
-      if (!zoom) {
-        zoom = 9;
-      }
-      if (map) {
-        map.remove();
-      }
-      let lat = data.current_airport_lat;
-      let lon = data.current_airport_lon;
-      map = L.map('mapLeaflet',
-        {
-          zoomControl: false,
-          scrollWheelZoom: false,
-          dragging: false
-        }
-      ).setView([lat, lon], zoom);
-      osm = false;
-      if (osm) {
-        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-          maxZoom: 18,
-          zoomControl: false,
          
-        }).addTo(map);
+
+          <hr />
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="card-body">
+                <h5 id="labelAircraft" class="card-title"><span class="text-warning" style="font-size:larger"><i class="fa fa-plane"></i></span> H/B772/L</h5>
+                <h6 class="card-subtitle text-muted"><span class="" style="font-size:larger"><i class="fa fa-user"></i></span> Dan EGLL</h6>
+              </div>
+              <ul class="list-group list-group-flush list-group">
+                <li class="list-group-item"><span class="text-warning">ALT</span> 34936</li>
+                <li class="list-group-item"><span class="text-warning">SPD</span> 581</li>
+                <li class="list-group-item"><span class="text-warning">HDG</span> 90</li>
+                <li class="list-group-item"><span class="text-warning">SSR</span> 2000</li>
+              </ul>  
+            </div>
+            <div class="col-sm-6" style="text-align:center;">
+              <img src="https://daisycon.io/images/airline/index.php?iata=wn&width=300&height=150&color=#0000ffff" height="75" /><br />
+              <span class="text-muted">Southwest Airlines</span><br />
+              <h3 class="text-info">Southwest</h3>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button id="buttonAircraft" class="btn" data-bs-toggle="modal" data-bs-target="#modalAircraft" style="display:none;"></button>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="library/leaflet/leaflet.js"></script>
+    <script src="library/leaflet/plugins/leaflet.rotatedMarker.js"></script>
+    <script>
+      var globalIcao = localStorage.getItem('icao');
+      var globalAirportHeight = 5558;
+      var url = window.location.host;
+      var uri = `https://${window.location.host}${window.location.pathname}/vatsim.asmx`;
+      var globalTick;
+      var globalData;
+      var globalZoom = 1.0;
+      var globalWeather = null;
+      var keepRunways = false;
+      var globalKeepRunways = 0;
+      var globalAirportInfo = null;
+      var globalShowWeatherBackground = true;
+      var globalDarkBackground = false;
+      var map = null;
+      var refresh = false;
+      var leafletMarkers = null;
+      var aipMap = null;
+
+      $(() => {
+        if (!globalIcao || globalIcao === '') {
+          globalIcao = 'FAOR';
+        }
+        let current = localStorage.getItem('temptype');
+        if (!current || current === '') {
+          current = true;
+        }
+        $('#flewSwitchTemp').prop('checked', (current == 'true'));
+
+        let hideDeps = localStorage.getItem('hideDeps');
+        $('#switchDepsOff').prop('checked', (hideDeps == 'true'));
+        globalZoom = localStorage.getItem('globalZoom');
+        if (!globalZoom || isNaN(globalZoom)) {
+          globalZoom = 1.0;
+        }
+        $('#body-global').css('zoom', globalZoom);
+        $('#labelScale').html(Math.round(globalZoom * 100));
+
+        globalShowWeatherBackground = localStorage.getItem('globalShowWeatherBackground') === 'true';
+        if (globalShowWeatherBackground === null) {
+          globalShowWeatherBackground = true;
+        }
+        $('#switchBackground').prop('checked', globalShowWeatherBackground);
+
+        globalDarkBackground = localStorage.getItem('globalDarkBackground') === 'true';
+        if (globalDarkBackground === null) {
+          globalDarkBackground = false;
+        }
+        $('#switchDark').prop('checked', globalDarkBackground);
+
+        if (globalDarkBackground) {
+          $('body').prop('style', 'background-color: #222;');
+        }
+        else {
+          $('body').prop('style', '');
+        }
+
+        setWindows();
+        getDataFromServer();
+
+      });
+
+      function getDataFromServer() {
+        $('.progress-bar-loader').fadeIn(100);
+        $('.progress-bar-loader2').fadeIn(100);
+
+        const sendData = {
+          icao: globalIcao
+        }
+
+        // Vatsim data
+        $.ajax(uri + '/GetData', {
+          dataType: 'json',
+          data: JSON.stringify(sendData),
+          contentType: "application/json; charset=utf-8",
+          type: 'POST',
+          success: (data) => {
+            globalData = data.d;
+            $('.progress-bar-loader').fadeOut(100);
+            if (data.d.result) {
+              $('.error-message').hide();
+              globalAirportInfo = data.d;
+              updateData(data.d);
+            }
+            else {
+              $('.error-message').html(`Could not load Vatsim data`);
+              $('.error-message').show();
+            }
+          }
+        });
+
+        // Weather data
+        $.ajax(uri + '/GetMetar', {
+          dataType: 'json',
+          data: JSON.stringify(sendData),
+          contentType: "application/json; charset=utf-8",
+          type: 'POST',
+          success: (data) => {
+            $('.progress-bar-loader2').fadeOut(100);
+            globalWeather = data.d
+            updateMetar(data.d);
+          }
+        });
+
+        globalTick = setTimeout(() => { getDataFromServer(); }, 60000);
       }
-      else {
-        // Stadia
-        L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
-          maxZoom: 20,
-          attribution: '&copy;<a href="https://stadiamaps.com/">Stadia Maps</a>,&copy;<a href="https://openmaptiles.org/">OpenMapTiles</a>&copy;<a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
-          apikey: '045c51c2-5a59-488a-981c-953f134f4834'
-        }).addTo(map);
-      }
 
+      function updateData(data) {
+        if (data === null) {
+          $('#icaoLabel').html(globalIcao);
+          $('#airportName').html("ICAO code not found in database");
+          return;
+        }
+        $('#icaoLabel').html(globalIcao);
+        let flagString = `<img height="18" width="30" src="images/flags/${data.current_airport_country_code}.svg" title="${data.current_airport_country}" />`
+        $('#airportName').html(`${flagString} ${data.current_airport_shortname} (${data.current_airport_name})`);
+        globalAirportHeight = data.airport_height;
 
+        // Filter out empty flight plans
+        const preFlightPlanPilots = data.prefiles
+          .filter(pi => pi.flight_plan !== null);
 
-      refresh = true;
+        const filedDepartures = preFlightPlanPilots
+          .filter(pi => pi.flight_plan.departure === globalIcao)
+          .sort((a, b) => { return a > b; });
 
-      L.circle([lat, lon], {
-        color: 'rgba(66, 144, 245,0.3)',
-        fillColor: 'rgba(66, 144, 245,0.2)',
-        fillOpacity: 0.3,
-        radius: 7000
-      }).addTo(map);
+        const filedArrivals = preFlightPlanPilots
+          .filter(pi => pi.flight_plan.arrival === globalIcao)
+          .sort((a, b) => { return a > b; });
 
-      data.current_airport_runways.forEach((runway) => {
-        L.polyline([[runway.PrimaryLat, runway.PrimaryLon], [runway.SecondaryLat, runway.SecondaryLon]],
-          {
-            color: 'rgba(252, 186, 3, 0.6)'
-          }).addTo(map);       
-      })
+        const aerodromeATC = data.controllers
+          .filter(co => co.callsign.includes(globalIcao)
+            && co.frequency !== '199.998');
 
-     
+        const otherATC = data.controllers
+          .filter(co => !co.callsign.includes(globalIcao)
+            && co.frequency !== '199.998');
+        updateDepartures(data.departures);
+        updateArrivals(data.arrivals);
+        updateFiledData(filedDepartures, filedArrivals);
+        updateAtcData(aerodromeATC, otherATC)
+        updateAtis(data.atis.filter(a => a.callsign.includes(globalIcao)));
 
-      if (doMarkers) {
+        if (!keepRunways)
+          updateRunwayDirection(data.current_airport_runways);
+
+        if (!refresh) {
+          redrawMap(data);
+        }
+
         redrawMarkers(data);
       }
-    }
 
-    function redrawMarkers(data) {
-      if (!leafletMarkers) {
-        leafletMarkers = new L.LayerGroup();;
-      }
 
-      leafletMarkers.clearLayers();
 
-      let planeIconDepart = L.icon({
-        iconUrl: 'images/plane-green.png',
-        iconSize: [14, 14],
-      });
-
-      let planeIconArrive = L.icon({
-        iconUrl: 'images/plane-red.png',
-        iconSize: [14, 14],
-      });
-
-      data.pilots.forEach((plane) => {
-        let dir = plane.heading - 45;
-        if (dir < 0) {
-          dir = 360 + dir;
+      // Events
+      $('#loadIcao').click(() => {
+        clearTimeout(globalTick);
+        if (!$('#icaoCode').val() || $('#icaoCode').val() === '') {
+          $('error-message').show();
+          $('error-message').html('Cannot read icao code, please type a code in and press enter.');
+        }
+        else {
+          $('error-message').hide();
+          globalIcao = $('#icaoCode').val().toUpperCase();
         }
 
-        let depArr = "None";
-        if (plane.flight_plan) {
-          depArr = plane.flight_plan.departure;
+        localStorage.setItem('icao', globalIcao);
+        keepRunways = false;
+        refresh = false;
+        getDataFromServer();
+      });
+
+      $('#flewSwitchTemp').change((e) => {
+        switchTempType($(e.target).is(':checked'));
+      });
+
+      $('#switchDepsOff').change((e) => {
+        updateDepartures(globalData.departures);
+        localStorage.setItem('hideDeps', $(e.target).is(':checked'));
+      });
+
+      $('#icaoCode').keypress((e) => {
+        var key = e.which;
+        if (key == 13) {
+          $('#loadIcao').click();
+          return false;
         }
+      });
 
-        let marker = L.marker([plane.latitude, plane.longitude],
-          {
-            icon: depArr === globalIcao ? planeIconDepart : planeIconArrive,
-            rotationAngle: dir,
-            rotationOrigin: 'center'
-          });
-        leafletMarkers.addLayer(marker);
+      $('#buttonIncreaseZoom').click(() => {
+        globalZoom += 0.1;
+        if (globalZoom > 1.7) {
+          globalZoom = 1.7;
+        }
+        $('#body-global').css('zoom', globalZoom);
+        localStorage.setItem('globalZoom', globalZoom);
+        $('#labelScale').html(Math.round(globalZoom * 100));
+      });
 
+      $('#buttonDecreaseZoom').click(() => {
+
+        globalZoom -= 0.1;
+        if (globalZoom < 0.5) {
+          globalZoom = 0.5;
+        }
+        $('#body-global').css('zoom', globalZoom);
+        localStorage.setItem('globalZoom', globalZoom);
+        $('#labelScale').html(Math.round(globalZoom * 100));
+      });
+
+      $('#switchBackground').click((e) => {
+        globalShowWeatherBackground = $(e.target).is(':checked');
+        localStorage.setItem('globalShowWeatherBackground', globalShowWeatherBackground)
+        setCondition();
+      });
+
+      $('#switchDark').click((e) => {
+        globalDarkBackground = $(e.target).is(':checked');
+        localStorage.setItem('globalDarkBackground', globalDarkBackground)
+
+        if (globalDarkBackground) {
+          $('body').prop('style', 'background-color: #222;');
+        }
+        else {
+          $('body').prop('style', '');
+        }
       })
 
-      map.addLayer(leafletMarkers);
-    }
+      $('.window-switches').click((e) => {
+        let windowSettings = getWindowSettings();
+        let targetWindow = $(e.target).attr('data-window');
+        let isChecked = $(e.target).is(':checked');
+        eval(`windowSettings.${targetWindow} = isChecked ? true : false`);
+        if (isChecked) {
+          eval(`$('#window${targetWindow}').show();`)
+        }
+        else {
+          eval(`$('#window${targetWindow}').hide();`)
+        }
+        setWindowSettings(windowSettings);
 
-    function updateRunwayDirection(runwaydata) {
-      const unique = [...new Set(runwaydata.map(item => item.PrimaryDegrees))]; // [ 9 ]
-      $('.runway-select').hide();
-      $('.runway-one').hide();
-      for (let i = 0; i < unique.length; i++) {
-        let runway = runwaydata.filter(a => a.PrimaryDegrees === unique[i]);
-        let runwayCount = runway.length;
+        if (targetWindow === 'map' && isChecked) {
+          redrawMap(globalAirportInfo, true);
+        }
 
-        let primary = runway[0].PrimaryDegrees < 10
-          ? `0${runway[0].PrimaryDegrees}`
-          : runway[0].PrimaryDegrees
-        let secondary = runway[0].SecondaryDegrees < 10
-          ? `0${runway[0].SecondaryDegrees}`
-          : runway[0].SecondaryDegrees;
+        if (
+          !windowSettings.atis
+          && !windowSettings.nearby
+          && !windowSettings.filedDeps
+          && !windowSettings.filedArrs
+          && !windowSettings.deps
+          && !windowSettings.arrs
+          && !windowSettings.atc
+          && !windowSettings.map
+        ) {
+          $('#windowLeftSide').hide();
+        }
+        else {
+          $('#windowLeftSide').show();
+        }
+      });
 
-        let htmlString = `<option value="${primary}">${primary}</option>
-                                <option value="${secondary}">${secondary}</option>`;
+      $('.runway-select').change((e) => {
+        let runwayNumber = $(e.target).attr('data-runway');
+        let runwayDegrees = $(e.target).prop('value');
+        let calcDegrees = runwayDegrees * 10;
+        $(`#runway${runwayNumber}`)
+          .css('transform',
+            `translate(0px) rotate(${calcDegrees}deg)`)
+        keepRunways = true;
+        let runway = globalAirportInfo.current_airport_runways
+          .filter(a => a.PrimaryDegrees === parseInt(runwayDegrees)
+            || a.SecondaryDegrees === parseInt(runwayDegrees));
+        setRunways(runwayNumber, calcDegrees, runway.length);
+      });
 
-        let calcDegrees = runway[0].PrimaryDegrees * 10;
+      $('#zoomView').click(() => {
+        let lat = globalAirportInfo.current_airport_lat;
+        let lon = globalAirportInfo.current_airport_lon;
+
+        if (map.getZoom() === 9)
+          //redrawMap(globalAirportInfo, true, 12)
+          map.setZoom(12);
+        else
+          map.setZoom(9);
+        //redrawMap(globalAirportInfo, true, 9)
+      })
+
+
+      // Functions
+      function redrawMap(data, doMarkers, zoom) {
+        if (!zoom) {
+          zoom = 9;
+        }
+        if (map) {
+          map.remove();
+        }
+        let lat = data.current_airport_lat;
+        let lon = data.current_airport_lon;
+        map = L.map('mapLeaflet',
+          {
+            zoomControl: false,
+            scrollWheelZoom: false,
+            dragging: false
+          }
+        ).setView([lat, lon], zoom);
+        osm = false;
+        if (osm) {
+          L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 18,
+            zoomControl: false,
+
+          }).addTo(map);
+        }
+        else {
+          // Stadia
+          L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+            maxZoom: 20,
+            attribution: '&copy;<a href="https://stadiamaps.com/">Stadia Maps</a>,&copy;<a href="https://openmaptiles.org/">OpenMapTiles</a>&copy;<a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+            apikey: '045c51c2-5a59-488a-981c-953f134f4834'
+          }).addTo(map);
+        }
 
 
 
+        refresh = true;
+        if (data.current_airport_airspace) {
+          L.polygon(data.current_airport_airspace.Polygon,
+            {
+              color: 'rgba(66, 144, 245,0.3)',
+              fillColor: 'rgba(66, 144, 245,0.2)',
+              fillOpacity: 0.3,
+            }).addTo(map);
+        }
+        else {
+          L.circle([lat, lon], {
+            color: 'rgba(66, 144, 245,0.3)',
+            fillColor: 'rgba(66, 144, 245,0.2)',
+            fillOpacity: 0.3,
+            radius: 9000
+          }).addTo(map);
+        }
 
-        $(`#selectRunway${i}`).html(htmlString);
-        $(`#selectRunway${i}`).show();
-        if (globalWeather) {
-          let currentWind = 0;
-          let useNumber = 0
-          if (globalWeather.ICAO === globalIcao) {
-            if (globalWeather.SurfaceWind.MeanDirection) {
-              currentWind = globalWeather.SurfaceWind.MeanDirection.ActualValue;
-            }
-            else {
-              currentWind = 999;
-            }
-            if (currentWind !== 999) {
-              let topEnd = calcDegrees - 90;
+        data.current_airport_runways.forEach((runway) => {
+          L.polyline([[runway.PrimaryLat, runway.PrimaryLon], [runway.SecondaryLat, runway.SecondaryLon]],
+            {
+              color: 'rgba(252, 186, 3, 0.6)'
+            }).addTo(map);
+        })
 
-              bottomEnd = calcDegrees + 90;
 
-              if (currentWind > bottomEnd)
-                currentWind = currentWind - 360;
-              useNumber = primary
 
-              if (currentWind == topEnd || currentWind == bottomEnd) {
-                useNumber = primary;
-              } else if (currentWind > topEnd && currentWind < bottomEnd) {
-                useNumber = primary;
-              } else {
-                calcDegrees = runway[0].SecondaryDegrees * 10;
-                useNumber = secondary
-              }
-            }
-            else {
-              useNumber = primary;
-            }
+        if (doMarkers) {
+          redrawMarkers(data);
+        }
+      }
 
-            $(`#selectRunway${i} > option[value="${useNumber}"]`).prop('selected', true)
+      function redrawMarkers(data) {
+        if (!leafletMarkers) {
+          leafletMarkers = new L.LayerGroup();;
+        }
 
-            setRunways(i, calcDegrees, runwayCount);
+        leafletMarkers.clearLayers();
 
-            globalKeepRunways = runwayCount;
+        let planeIconDepart = L.icon({
+          iconUrl: 'images/plane-green.png',
+          iconSize: [14, 14],
+        });
+
+        let planeIconArrive = L.icon({
+          iconUrl: 'images/plane-red.png',
+          iconSize: [14, 14],
+        });
+
+        data.pilots.forEach((plane) => {
+          let dir = plane.heading - 45;
+          if (dir < 0) {
+            dir = 360 + dir;
+          }
+
+          let depArr = "None";
+          if (plane.flight_plan) {
+            depArr = plane.flight_plan.departure;
+          }
+
+          let marker = L.marker([plane.latitude, plane.longitude],
+            {
+              icon: depArr === globalIcao ? planeIconDepart : planeIconArrive,
+              rotationAngle: dir,
+              rotationOrigin: 'center'
+            });
+          if (plane.airline_data) {
+            marker.bindTooltip(`<span class='tooltip-callsigns'><img src=${plane.airline_data.logo} height="20px" /> ${plane.callsign}</span>`);
           }
           else {
+            marker.bindTooltip(`<span class='tooltip-callsigns'>${plane.callsign}</span>`);
+          }
+          leafletMarkers.addLayer(marker);
+        })
+
+        map.addLayer(leafletMarkers);
+      }
+
+      function showAircraftModal(callsign) {
+        //let plane = globalAirportInfo.pilots.filter(a => a.callsign === callsign)[0];
+        $('#modalAircraftLabel').html(callsign);
+        $('#buttonAircraft').click();
+        console.log(callsign);
+      }
+
+      function updateRunwayDirection(runwaydata) {
+        const unique = [...new Set(runwaydata.map(item => item.PrimaryDegrees))]; // [ 9 ]
+        $('.runway-select').hide();
+        $('.runway-one').hide();
+        for (let i = 0; i < unique.length; i++) {
+          let runway = runwaydata.filter(a => a.PrimaryDegrees === unique[i]);
+          let runwayCount = runway.length;
+
+          let primary = runway[0].PrimaryDegrees < 10
+            ? `0${runway[0].PrimaryDegrees}`
+            : runway[0].PrimaryDegrees
+          let secondary = runway[0].SecondaryDegrees < 10
+            ? `0${runway[0].SecondaryDegrees}`
+            : runway[0].SecondaryDegrees;
+
+          let htmlString = `<option value="${primary}">${primary}</option>
+                                          <option value="${secondary}">${secondary}</option>`;
+
+          let calcDegrees = runway[0].PrimaryDegrees * 10;
+
+
+
+
+          $(`#selectRunway${i}`).html(htmlString);
+          $(`#selectRunway${i}`).show();
+          if (globalWeather) {
+            let currentWind = 0;
+            let useNumber = 0
+            if (globalWeather.ICAO === globalIcao) {
+              if (globalWeather.SurfaceWind.MeanDirection) {
+                currentWind = globalWeather.SurfaceWind.MeanDirection.ActualValue;
+              }
+              else {
+                currentWind = 999;
+              }
+              if (currentWind !== 999) {
+                let topEnd = calcDegrees - 90;
+
+                bottomEnd = calcDegrees + 90;
+
+                if (currentWind > bottomEnd)
+                  currentWind = currentWind - 360;
+                useNumber = primary
+
+                if (currentWind == topEnd || currentWind == bottomEnd) {
+                  useNumber = primary;
+                } else if (currentWind > topEnd && currentWind < bottomEnd) {
+                  useNumber = primary;
+                } else {
+                  calcDegrees = runway[0].SecondaryDegrees * 10;
+                  useNumber = secondary
+                }
+              }
+              else {
+                useNumber = primary;
+              }
+
+              $(`#selectRunway${i} > option[value="${useNumber}"]`).prop('selected', true)
+
+              setRunways(i, calcDegrees, runwayCount);
+
+              globalKeepRunways = runwayCount;
+            }
+            else {
+              setRunways(i, calcDegrees, runwayCount);
+            }
+          } else {
             setRunways(i, calcDegrees, runwayCount);
           }
-        } else {
-          setRunways(i, calcDegrees, runwayCount);
+
+          if (i === 2)
+            break;
         }
-
-        if (i === 2)
-          break;
       }
-    }
 
-    function setRunways(i, calcDegrees, runwayCount) {
-      let y2 = 0;
-      let x2 = 0;
-      let toRadian = (Math.PI / 180.0);
-      switch (runwayCount) {
-        case 1:
-          $(`#runway${i}`).show();
-          $(`#runway${i}`)
-            .css('transform',
+      function setRunways(i, calcDegrees, runwayCount) {
+        let y2 = 0;
+        let x2 = 0;
+        let toRadian = (Math.PI / 180.0);
+        switch (runwayCount) {
+          case 1:
+            $(`#runway${i}`).show();
+            $(`#runway${i}`)
+              .css('transform',
+                `translate(0px) rotate(${calcDegrees}deg)`)
+            break;
+          case 2:
+            $(`#runway${i}`).show();
+            $(`#runway${i}b`).show();
+            transformDir = calcDegrees - 90.0;
+            if (transformDir < 0)
+              transformDir = 360 + transformDir;
+
+            x2 = Math.round(Math.sin(transformDir * toRadian) * 40);
+            y2 = -Math.round(Math.cos(transformDir * toRadian) * 40);
+
+            // RWY a
+            $(`#runway${i}`).css('transform',
               `translate(0px) rotate(${calcDegrees}deg)`)
-          break;
-        case 2:
-          $(`#runway${i}`).show();
-          $(`#runway${i}b`).show();
-          transformDir = calcDegrees - 90.0;
-          if (transformDir < 0)
-            transformDir = 360 + transformDir;
 
-          x2 = Math.round(Math.sin(transformDir * toRadian) * 40);
-          y2 = -Math.round(Math.cos(transformDir * toRadian) * 40);
+            // RWY b
+            $(`#runway${i}b`).css('transform',
+              `rotate(${calcDegrees}deg)`);
+            $(`#runway${i}bmove`).css('transform',
+              `translate(${x2}px,${y2}px) `);
+            break;
+          case 3:
+            $(`#runway${i}`).show();
+            $(`#runway${i}b`).show();
+            $(`#runway${i}c`).show();
 
-          // RWY a
-          $(`#runway${i}`).css('transform',
-            `translate(0px) rotate(${calcDegrees}deg)`)
-
-          // RWY b
-          $(`#runway${i}b`).css('transform',
-            `rotate(${calcDegrees}deg)`);
-          $(`#runway${i}bmove`).css('transform',
-            `translate(${x2}px,${y2}px) `);
-          break;
-        case 3:
-          $(`#runway${i}`).show();
-          $(`#runway${i}b`).show();
-          $(`#runway${i}c`).show();
-
-          transformDir = calcDegrees - 90.0;
-          if (transformDir < 0)
-            transformDir = 360 + transformDir;
+            transformDir = calcDegrees - 90.0;
+            if (transformDir < 0)
+              transformDir = 360 + transformDir;
 
 
-          x2 = Math.round(Math.sin(transformDir * toRadian) * 40);
-          y2 = -Math.round(Math.cos(transformDir * toRadian) * 40);
+            x2 = Math.round(Math.sin(transformDir * toRadian) * 40);
+            y2 = -Math.round(Math.cos(transformDir * toRadian) * 40);
 
-          // RWY a
-          $(`#runway${i}`).css('transform',
-            `translate(0px) rotate(${calcDegrees}deg)`)
+            // RWY a
+            $(`#runway${i}`).css('transform',
+              `translate(0px) rotate(${calcDegrees}deg)`)
 
-          // RWY b
-          $(`#runway${i}b`).css('transform',
-            `rotate(${calcDegrees}deg)`);
-          $(`#runway${i}bmove`).css('transform',
-            `translate(${x2}px,${y2}px) `);
+            // RWY b
+            $(`#runway${i}b`).css('transform',
+              `rotate(${calcDegrees}deg)`);
+            $(`#runway${i}bmove`).css('transform',
+              `translate(${x2}px,${y2}px) `);
 
-          transformDir = calcDegrees + 90.0;
-          if (transformDir > 360)
-            transformDir = transformDir - 360;
+            transformDir = calcDegrees + 90.0;
+            if (transformDir > 360)
+              transformDir = transformDir - 360;
 
-          x2 = Math.round(Math.sin(transformDir * toRadian) * 40);
-          y2 = -Math.round(Math.cos(transformDir * toRadian) * 40);
+            x2 = Math.round(Math.sin(transformDir * toRadian) * 40);
+            y2 = -Math.round(Math.cos(transformDir * toRadian) * 40);
 
-          // RWY c
-          $(`#runway${i}c`).css('transform',
-            `rotate(${calcDegrees}deg)`);
-          $(`#runway${i}cmove`).css('transform',
-            `translate(${x2}px,${y2}px) `);
-          break;
-      }
-    }
-
-    function getWindowSettings() {
-      let windowSettingsJson = localStorage.getItem('windowSettings');
-      return JSON.parse(windowSettingsJson);
-    }
-
-    function setWindowSettings(settings) {
-      // Backwards compatibility
-      if (settings.map === null) {
-        settings.map = true;
-      }
-      localStorage.setItem('windowSettings', JSON.stringify(settings));
-    }
-
-    function setWindows() {
-
-      let windowSettings = getWindowSettings();
-      if (!windowSettings) {
-        windowSettings = {
-          atis: true,
-          atc: true,
-          nearby: true,
-          filedDeps: true,
-          filedArrs: true,
-          deps: true,
-          arrs: true,
-          weather: true,
-          map: true
-        };       
-        setWindowSettings(windowSettings);
-      }
-
-      if (
-        !windowSettings.atis
-        && !windowSettings.nearby
-        && !windowSettings.filedDeps
-        && !windowSettings.filedArrs
-        && !windowSettings.deps
-        && !windowSettings.arrs
-        && !windowSettings.atc
-      ) {
-        $('#windowLeftSide').hide();
-      }
-      else {
-        $('#windowLeftSide').show();
-      }
-
-      $('#switchAtis').prop('checked', windowSettings.atis);
-      $('#switchATC').prop('checked', windowSettings.atc);
-      $('#switchNearby').prop('checked', windowSettings.nearby);
-      $('#switchFiledDeps').prop('checked', windowSettings.filedDeps);
-      $('#switchFiledArrs').prop('checked', windowSettings.filedArrs);
-      $('#switchDeps').prop('checked', windowSettings.deps);
-      $('#switchArrs').prop('checked', windowSettings.arrs);
-      $('#switchWeather').prop('checked', windowSettings.weather);
-      $('#switchMap').prop('checked', windowSettings.map);
-
-      if (windowSettings.atis) {
-        $('#windowatis').show();
-      } else {
-        $('#windowatis').hide();
-      }
-
-      if (windowSettings.atc) {
-        $('#windowatc').show();
-      } else {
-        $('#windowatc').hide();
-      }
-
-      if (windowSettings.nearby) {
-        $('#windownearby').show();
-      } else {
-        $('#windownearby').hide();
-      }
-
-      if (windowSettings.filedDeps) {
-        $('#windowfiledDeps').show();
-      } else {
-        $('#windowfiledDeps').hide();
-      }
-
-      if (windowSettings.deps) {
-        $('#windowdeps').show();
-      } else {
-        $('#windowdeps').hide();
-      }
-
-      if (windowSettings.filedArrs) {
-        $('#windowfiledArrs').show();
-      } else {
-        $('#windowfiledArrs').hide();
-      }
-
-      if (windowSettings.arrs) {
-        $('#windowarrs').show();
-      } else {
-        $('#windowarrs').hide();
-      }
-
-      if (windowSettings.weather) {
-        $('#windowweather').show();
-      } else {
-        $('#windowweather').hide();
-      }
-
-      if (windowSettings.map) {
-        $('#windowmap').show();
-      } else {
-        $('#windowmap').hide();
-      }
-
-    }
-
-    function updateMetar(data) {
-      if (!data) {
-        $('#rawMetar').html(`ICAO code returned no METAR`);
-        return;
-      }
-
-      $('#rawMetar').html(data.RawMetar);
-
-      // Pressure
-      if (data.Pressure.ActualUnit === 9) {
-        $('#labelQnh').html(data.Pressure.ActualValue);
-        $('#labelAlt')
-          .html((data.Pressure.ActualValue * 0.0295301).toFixed(2));
-      } else {
-        $('#labelAlt').html(data.Pressure.ActualValue);
-        $('#labelQnh').html((data.Pressure.ActualValue * 33.864).toFixed(0));
-      }
-
-      // Temperatures
-      if ($('#flewSwitchTemp').is(':checked')) {
-        $('#labelTemp').html(`${data.AirTemperature.ActualValue} °C`);
-        $('#labelDew').html(`${data.DewPointTemperature.ActualValue} °C`);
-      }
-      else {
-        $('#labelTemp')
-          .html(`${((data.AirTemperature.ActualValue * 9 / 5) + 32)
-            .toFixed(0)} °F`);
-        $('#labelDew')
-          .html(`${((data.DewPointTemperature.ActualValue * 9 / 5) + 32)
-            .toFixed(0)} °F`);
-      }
-
-
-      // Visibility
-      if (!data.Visibility)
-        $('#labelVisibilityValue').html(">10000m");
-      else {
-        let unit = data.Visibility.PrevailingVisibility.ActualUnit === 7 ? 'ft' : data.Visibility.PrevailingVisibility.ActualUnit === 8 ? 'nm' : 'm';
-        $('#labelVisibilityValue').html(`${data.Visibility.PrevailingVisibility.ActualValue}${unit}`);
-      }
-
-      // Wind
-      if (!data.SurfaceWind.VariableDirection) {
-        const windText = data.SurfaceWind.MeanDirection.ActualValue
-
-        $('.wind-needle').fadeIn(500);
-        $('.wind-needle')
-          .css('transform',
-            `translate(-4px) rotate(${data.SurfaceWind.MeanDirection.ActualValue}deg)`)
-          .toString().padStart(3, '0')
-        $('#windLabel')
-          .html(`${windText}° | ${data.SurfaceWind.MeanSpeed.ActualValue} kts`);
-      }
-      else {
-        $('.wind-needle').fadeOut(500);
-        $('#windLabel').html(`Variable | ${data.SurfaceWind.MeanSpeed.ActualValue}kts`);
-      }
-
-      if (data.SurfaceWind.DirectionVariations) {
-        const windVar1 = data.SurfaceWind.DirectionVariations[0].ActualValue;
-        const windVar2 = data.SurfaceWind.DirectionVariations[1].ActualValue;
-
-        $('.wind-needle-var, .wind-needle-var2, #windVariable').fadeIn(500);
-        $('.wind-needle-var')
-          .css('transform',
-            `translate(-4px) rotate(${windVar1}deg)`)
-        $('.wind-needle-var2')
-          .css('transform',
-            `translate(-4px) rotate(${windVar2}deg)`)
-        $('#windVariable').html(`${windVar1}° - ${windVar2}°`);
-      }
-      else {
-        $('.wind-needle-var, .wind-needle-var2, #windVariable').fadeOut(500);
-      }
-
-      if (data.SurfaceWind.SpeedVariations) {
-        $('#windGusting').fadeIn(500);
-        $('#windGusting')
-          .html(`Gusting ${data.SurfaceWind.SpeedVariations.ActualValue}kts`);
-      } else {
-        $('#windGusting').fadeOut(500);
-      }
-
-
-      // Clouds
-      var cloudString = '';
-      data.Clouds = data.Clouds.sort(
-        (a, b) => (a.BaseHeight.ActualValue > b.BaseHeight.ActualValue) ? -1 : ((b.BaseHeight.ActualValue > a.BaseHeight.ActualValue) ? 1 : 0)
-      );
-      if (data.Clouds.length > 0) {
-        for (let cloud of data.Clouds) {
-          let cloudType = getCloudType(cloud.Amount);
-          let cloudIcon = getCloudIcon(cloud.Amount);
-          cloudString +=
-            `<li class="list-group-item">
-                      ${cloudIcon} ${cloud.BaseHeight.ActualValue}<sub class='text-muted'>ft</sub>
-                      <sup class="text-muted">${cloudType}</sup>
-                  </li>`
+            // RWY c
+            $(`#runway${i}c`).css('transform',
+              `rotate(${calcDegrees}deg)`);
+            $(`#runway${i}cmove`).css('transform',
+              `translate(${x2}px,${y2}px) `);
+            break;
         }
-      } else {
-        cloudString = '';
       }
-      $('#cloudList').html(cloudString);
-      $('#lastUpdate')
-        .html(`Last Update: Day ${data.Day} - ${data.Time.replace(' UTC', 'z')} for ${data.ICAO} ${data.Status}`);
 
-      // Condition
-      setCondition();
+      function getWindowSettings() {
+        let windowSettingsJson = localStorage.getItem('windowSettings');
+        return JSON.parse(windowSettingsJson);
+      }
 
+      function setWindowSettings(settings) {
+        // Backwards compatibility
+        if (settings.map === null) {
+          settings.map = true;
+        }
+        localStorage.setItem('windowSettings', JSON.stringify(settings));
+      }
 
+      function setWindows() {
 
-      // IMC VMC
-      let imcvmc = '<span class="badge bg-success">VMC</span>';
-      if (data.Visibility) {
+        let windowSettings = getWindowSettings();
+        if (!windowSettings) {
+          windowSettings = {
+            atis: true,
+            atc: true,
+            nearby: true,
+            filedDeps: true,
+            filedArrs: true,
+            deps: true,
+            arrs: true,
+            weather: true,
+            map: true
+          };
+          setWindowSettings(windowSettings);
+        }
+
         if (
-          (data.Visibility.PrevailingVisibility.ActualUnit === 8 &&
-            data.Visibility.PrevailingVisibility.ActualValue <= 3)
-          || (data.Visibility.PrevailingVisibility.ActualUnit === 7 &&
-            data.Visibility.PrevailingVisibility.ActualValue <= 3000)
-          || (data.Visibility.PrevailingVisibility.ActualUnit === 6 &&
-            data.Visibility.PrevailingVisibility.ActualValue <= 5000)) {
-          imcvmc = '<span class="badge bg-danger">IMC</span>';
+          !windowSettings.atis
+          && !windowSettings.nearby
+          && !windowSettings.filedDeps
+          && !windowSettings.filedArrs
+          && !windowSettings.deps
+          && !windowSettings.arrs
+          && !windowSettings.atc
+        ) {
+          $('#windowLeftSide').hide();
         }
+        else {
+          $('#windowLeftSide').show();
+        }
+
+        $('#switchAtis').prop('checked', windowSettings.atis);
+        $('#switchATC').prop('checked', windowSettings.atc);
+        $('#switchNearby').prop('checked', windowSettings.nearby);
+        $('#switchFiledDeps').prop('checked', windowSettings.filedDeps);
+        $('#switchFiledArrs').prop('checked', windowSettings.filedArrs);
+        $('#switchDeps').prop('checked', windowSettings.deps);
+        $('#switchArrs').prop('checked', windowSettings.arrs);
+        $('#switchWeather').prop('checked', windowSettings.weather);
+        $('#switchMap').prop('checked', windowSettings.map);
+
+        if (windowSettings.atis) {
+          $('#windowatis').show();
+        } else {
+          $('#windowatis').hide();
+        }
+
+        if (windowSettings.atc) {
+          $('#windowatc').show();
+        } else {
+          $('#windowatc').hide();
+        }
+
+        if (windowSettings.nearby) {
+          $('#windownearby').show();
+        } else {
+          $('#windownearby').hide();
+        }
+
+        if (windowSettings.filedDeps) {
+          $('#windowfiledDeps').show();
+        } else {
+          $('#windowfiledDeps').hide();
+        }
+
+        if (windowSettings.deps) {
+          $('#windowdeps').show();
+        } else {
+          $('#windowdeps').hide();
+        }
+
+        if (windowSettings.filedArrs) {
+          $('#windowfiledArrs').show();
+        } else {
+          $('#windowfiledArrs').hide();
+        }
+
+        if (windowSettings.arrs) {
+          $('#windowarrs').show();
+        } else {
+          $('#windowarrs').hide();
+        }
+
+        if (windowSettings.weather) {
+          $('#windowweather').show();
+        } else {
+          $('#windowweather').hide();
+        }
+
+        if (windowSettings.map) {
+          $('#windowmap').show();
+        } else {
+          $('#windowmap').hide();
+        }
+
       }
-      if (data.Clouds.length > 0) {
-        if (data.Clouds.
-          filter(cloud => cloud.BaseHeight.ActualValue <= 500).length > 0) {
-          imcvmc = '<span class="badge bg-danger">IMC</span>';
+
+      function updateMetar(data) {
+        if (!data) {
+          $('#rawMetar').html(`ICAO code returned no METAR`);
+          return;
+        }
+
+        $('#rawMetar').html(data.RawMetar);
+
+        // Pressure
+        if (data.Pressure.ActualUnit === 9) {
+          $('#labelQnh').html(data.Pressure.ActualValue);
+          $('#labelAlt')
+            .html((data.Pressure.ActualValue * 0.0295301).toFixed(2));
+        } else {
+          $('#labelAlt').html(data.Pressure.ActualValue);
+          $('#labelQnh').html((data.Pressure.ActualValue * 33.864).toFixed(0));
+        }
+
+        // Temperatures
+        if ($('#flewSwitchTemp').is(':checked')) {
+          $('#labelTemp').html(`${data.AirTemperature.ActualValue} °C`);
+          $('#labelDew').html(`${data.DewPointTemperature.ActualValue} °C`);
+        }
+        else {
+          $('#labelTemp')
+            .html(`${((data.AirTemperature.ActualValue * 9 / 5) + 32)
+              .toFixed(0)} °F`);
+          $('#labelDew')
+            .html(`${((data.DewPointTemperature.ActualValue * 9 / 5) + 32)
+              .toFixed(0)} °F`);
+        }
+
+
+        // Visibility
+        if (!data.Visibility)
+          $('#labelVisibilityValue').html(">10000m");
+        else {
+          let unit = data.Visibility.PrevailingVisibility.ActualUnit === 7 ? 'ft' : data.Visibility.PrevailingVisibility.ActualUnit === 8 ? 'nm' : 'm';
+          $('#labelVisibilityValue').html(`${data.Visibility.PrevailingVisibility.ActualValue}${unit}`);
+        }
+
+        // Wind
+        if (!data.SurfaceWind.VariableDirection) {
+          const windText = data.SurfaceWind.MeanDirection.ActualValue
+
+          $('.wind-needle').fadeIn(500);
+          $('.wind-needle')
+            .css('transform',
+              `translate(-4px) rotate(${data.SurfaceWind.MeanDirection.ActualValue}deg)`)
+            .toString().padStart(3, '0')
+          $('#windLabel')
+            .html(`${windText}° | ${data.SurfaceWind.MeanSpeed.ActualValue} kts`);
+        }
+        else {
+          $('.wind-needle').fadeOut(500);
+          $('#windLabel').html(`Variable | ${data.SurfaceWind.MeanSpeed.ActualValue}kts`);
+        }
+
+        if (data.SurfaceWind.DirectionVariations) {
+          const windVar1 = data.SurfaceWind.DirectionVariations[0].ActualValue;
+          const windVar2 = data.SurfaceWind.DirectionVariations[1].ActualValue;
+
+          $('.wind-needle-var, .wind-needle-var2, #windVariable').fadeIn(500);
+          $('.wind-needle-var')
+            .css('transform',
+              `translate(-4px) rotate(${windVar1}deg)`)
+          $('.wind-needle-var2')
+            .css('transform',
+              `translate(-4px) rotate(${windVar2}deg)`)
+          $('#windVariable').html(`${windVar1}° - ${windVar2}°`);
+        }
+        else {
+          $('.wind-needle-var, .wind-needle-var2, #windVariable').fadeOut(500);
+        }
+
+        if (data.SurfaceWind.SpeedVariations) {
+          $('#windGusting').fadeIn(500);
+          $('#windGusting')
+            .html(`Gusting ${data.SurfaceWind.SpeedVariations.ActualValue}kts`);
+        } else {
+          $('#windGusting').fadeOut(500);
+        }
+
+
+        // Clouds
+        var cloudString = '';
+        data.Clouds = data.Clouds.sort(
+          (a, b) => (a.BaseHeight.ActualValue > b.BaseHeight.ActualValue) ? -1 : ((b.BaseHeight.ActualValue > a.BaseHeight.ActualValue) ? 1 : 0)
+        );
+        if (data.Clouds.length > 0) {
+          for (let cloud of data.Clouds) {
+            let cloudType = getCloudType(cloud.Amount);
+            let cloudIcon = getCloudIcon(cloud.Amount);
+            cloudString +=
+              `<li class="list-group-item">
+                                ${cloudIcon} ${cloud.BaseHeight.ActualValue}<sub class='text-muted'>ft</sub>
+                                <sup class="text-muted">${cloudType}</sup>
+                            </li>`
+          }
+        } else {
+          cloudString = '';
+        }
+        $('#cloudList').html(cloudString);
+        $('#lastUpdate')
+          .html(`Last Update: Day ${data.Day} - ${data.Time.replace(' UTC', 'z')} for ${data.ICAO} ${data.Status}`);
+
+        // Condition
+        setCondition();
+
+
+
+        // IMC VMC
+        let imcvmc = '<span class="badge bg-success">VMC</span>';
+        if (data.Visibility) {
+          if (
+            (data.Visibility.PrevailingVisibility.ActualUnit === 8 &&
+              data.Visibility.PrevailingVisibility.ActualValue <= 3)
+            || (data.Visibility.PrevailingVisibility.ActualUnit === 7 &&
+              data.Visibility.PrevailingVisibility.ActualValue <= 3000)
+            || (data.Visibility.PrevailingVisibility.ActualUnit === 6 &&
+              data.Visibility.PrevailingVisibility.ActualValue <= 5000)) {
+            imcvmc = '<span class="badge bg-danger">IMC</span>';
+          }
+        }
+        if (data.Clouds.length > 0) {
+          if (data.Clouds.
+            filter(cloud => cloud.BaseHeight.ActualValue <= 500).length > 0) {
+            imcvmc = '<span class="badge bg-danger">IMC</span>';
+          }
+        }
+
+        $('#badgeIMCVMC').html(imcvmc);
+      }
+
+      function setCondition() {
+        // Condition
+        let condition1 = 'Clear';
+        let condition2 = '';
+        if (globalWeather.SurfaceWind.MeanSpeed) {
+          if (globalWeather.SurfaceWind.MeanSpeed.ActualValue > 10) {
+            condition2 = '<span class="badge bg-light text-dark">Wind</span>';
+          }
+        }
+
+        if (globalWeather.Clouds.length > 0) {
+          if (globalWeather.Clouds.filter(cloud => cloud.Amount > 0 && cloud.Amount < 4).length > 0) {
+            condition1 = 'Partly Cloudy';
+          }
+          if (globalWeather.Clouds.filter(cloud => cloud.Amount > 3 && cloud.Amount < 5).length > 0) {
+            condition1 = 'Cloudy';
+          }
+        }
+
+        if (globalWeather.PresentWeather.length > 0) {
+          globalWeather.PresentWeather[0].Types.forEach((cond) => {
+            condition2 += getConditionType(cond);
+          });
+        }
+
+        let weatherIcon = `<i class="fa fa-sun text-warning" style="font-size: 2rem; display:block"></i>`
+
+        if (condition1 === 'Partly Cloudy') {
+          weatherIcon = `<i class="fa fa-cloud-sun cloud-scattered" style="font-size: 2rem; display:block"></i>`
+        }
+
+        if (condition1 === 'Cloudy') {
+          weatherIcon = `<i class="fa fa-cloud cloud-broken" style="font-size: 2rem; display:block"></i>`
+        }
+
+        if (condition2.includes('Rain')) {
+          weatherIcon = `<i class="fa fa-cloud-rain cloud-overcast" style="font-size: 2rem; display:block"></i>`
+        }
+
+        if (condition2.includes('Snow')) {
+          weatherIcon = `<i class="fa fa-snowflake text-info" style="font-size: 2rem; display:block"></i>`
+        }
+
+        if (condition2.includes('Thunderstorm')) {
+          weatherIcon = `<i class="fa fa-cloud-showers-heavy cloud-overcast" style="font-size: 2rem; display:block"></i>`
+        }
+
+        if (condition2.includes('Wind')) {
+          weatherIcon += `<i class="fa fa-wind text-muted label-special-wind" style="font-size: 2rem; display:inline-block"></i>`
+        }
+
+        let weatherStr = ` ${weatherIcon}
+                                      <span class="label-condition">${condition1}</span>
+                                      <span class="label-condition">${condition2}</span>`
+
+        $('#weatherCondition').html(weatherStr);
+
+
+        // Background condition
+        if (globalShowWeatherBackground) {
+          let bgCondition = '';
+          if (condition1 === 'Clear') {
+            bgCondition = 'background-clear';
+          }
+          if (condition1 === 'Partly Cloudy') {
+            bgCondition = 'background-partly-cloudy'
+          }
+          if (condition1 === 'Cloudy') {
+            bgCondition = 'background-cloudy'
+          }
+
+          if (condition2.includes('Fog')
+            || condition2.includes('Mist')
+            || condition2.includes('Haze')) {
+            bgCondition = 'background-partly-cloudy'
+          }
+
+          if (condition2.includes('Rain')
+            || condition2.includes('Drizzle')
+            || condition2.includes('Thunderstorm')
+            || condition2.includes('Showers')) {
+            bgCondition = 'background-rain'
+          }
+
+          document.querySelector('body').className = bgCondition;
+        }
+        else {
+          document.querySelector('body').className = '';
         }
       }
 
-      $('#badgeIMCVMC').html(imcvmc);
-    }
+      function updateDepartures(departures) {
+        $('#depList').fadeOut(500, () => {
+          $('#depList').html('');
+          $('#depList').show();
+          let counter = 0;
+          if (departures) {
+            for (let plane of departures) {
+              counter += 200;
+              let isAirborne = false;
+              let hideDeparted = $('#switchDepsOff').is(':checked');
+              let iconString = "";
+              switch (plane.status) {
+                case "Preparing":
+                  iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
+                                                     <i class="far fa-clock text-primary"></i>`;
+                  break;
+                case "Taxi Out":
+                  iconString = `Taxi to Rwy <i class="fas fa-plane-departure text-primary"></i>`;
+                  break;
+                case "Departing":
+                  iconString = `Departing  <i class="fas fa-plane-departure text-primary"></i>`;
+                  break;
+                case "Airborne":
+                  isAirborne = true;
+                  iconString = `ETA ${plane.calculated_arrival_time.toString().padStart(4, 0).substring(0, 2)}:${plane.calculated_arrival_time.toString().padStart(4, 0).substring(2, 4)}z
+                                                    <i class="fas fa-plane text-primary"></i>`;
+                  break;
+                case "Arriving":
+                  isAirborne = true;
+                  iconString = `Arriving at Airport <i class="fas fa-plane-arrival text-primary"></i>`;
+                  break;
+                case "Taxi In":
+                  isAirborne = true;
+                  iconString = `Taxi to Parking <i class="fas fa-plane-arrival text-primary"></i>`;
+                  break;
+                case "Arrived":
+                  isAirborne = true;
+                  iconString = `Arrived at Airport <i class="fas fa-check text-primary"></i>`;
+                  break;
+              }
+              if (isAirborne && hideDeparted) {
+                continue;
+              }
 
-    function setCondition() {
-      // Condition
-      let condition1 = 'Clear';
-      let condition2 = '';
-      if (globalWeather.SurfaceWind.MeanSpeed) {
-        if (globalWeather.SurfaceWind.MeanSpeed.ActualValue > 10) {
-          condition2 = '<span class="badge bg-light text-dark">Wind</span>';
-        }
-      }
-
-      if (globalWeather.Clouds.length > 0) {
-        if (globalWeather.Clouds.filter(cloud => cloud.Amount > 0 && cloud.Amount < 4).length > 0) {
-          condition1 = 'Partly Cloudy';
-        }
-        if (globalWeather.Clouds.filter(cloud => cloud.Amount > 3 && cloud.Amount < 5).length > 0) {
-          condition1 = 'Cloudy';
-        }
-      }
-
-      if (globalWeather.PresentWeather.length > 0) {
-        globalWeather.PresentWeather[0].Types.forEach((cond) => {
-          condition2 += getConditionType(cond);
+              // Circuits
+              if (plane.flight_plan.departure === plane.flight_plan.arrival) {
+                iconString = `Circuits <i class="fas fa-retweet"></i>`;
+                isAirborne = false;
+              }
+              let airlineString = '';
+              if (plane.airline_data) {
+                airlineString = plane.airline_data.callsign;
+              }            
+              let disabled = (isAirborne) ? 'opacity:0.8;' : '';
+              let flagString = `<img height="10" width="15" src="images/flags/${plane.arr_airport_country_code}.svg" title="${plane.arr_airport_country}" />`
+              let cardString =
+                ` <li class="list-group-item plane background-logo" id='id-${plane.callsign}' style='display:none; ${disabled}' title="${plane.name}" >
+                                        <h5 class="time-tag">${iconString}</h5>
+                                        <h5 class="card-title" id='title-${plane.callsign}'><strong onclick="showAircraftModal('${plane.callsign}')">${plane.callsign}</strong>
+                                          <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa} <span class="text-info" style="font-size:smaller">${airlineString}</span></span>
+                                        </h5>
+                                        <h6 class="card-subtitle text-danger">
+                                          <sup class="text-muted">To </sup>
+                                          <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.arrival}');">${flagString} ${plane.flight_plan.arrival}</strong>
+                                          <span class="text-muted airport-name">${plane.arr_airport_shortname} (${plane.arr_airport_name})</span>
+                                        </h6>
+                                    </li>`
+              $('#depList').append(cardString);
+              $(`#id-${plane.callsign}`).fadeIn(200 + counter);
+              if (plane.airline_data) {
+                $(`#id-${plane.callsign}`).css('background', `url(${plane.airline_data.logo})`);
+              }
+            }
+          }
         });
       }
 
-      let weatherIcon = `<i class="fa fa-sun text-warning" style="font-size: 2rem; display:block"></i>`
+      function updateArrivals(arrivals) {
+        $('#arrList').fadeOut(500, () => {
+          $('#arrList').html('');
+          $('#arrList').show();
+          let counter = 0;
 
-      if (condition1 === 'Partly Cloudy') {
-        weatherIcon = `<i class="fa fa-cloud-sun cloud-scattered" style="font-size: 2rem; display:block"></i>`
-      }
-
-      if (condition1 === 'Cloudy') {
-        weatherIcon = `<i class="fa fa-cloud cloud-broken" style="font-size: 2rem; display:block"></i>`
-      }
-
-      if (condition2.includes('Rain')) {
-        weatherIcon = `<i class="fa fa-cloud-rain cloud-overcast" style="font-size: 2rem; display:block"></i>`
-      }
-
-      if (condition2.includes('Snow')) {
-        weatherIcon = `<i class="fa fa-snowflake text-info" style="font-size: 2rem; display:block"></i>`
-      }
-
-      if (condition2.includes('Thunderstorm')) {
-        weatherIcon = `<i class="fa fa-cloud-showers-heavy cloud-overcast" style="font-size: 2rem; display:block"></i>`
-      }
-
-      if (condition2.includes('Wind')) {
-        weatherIcon += `<i class="fa fa-wind text-muted label-special-wind" style="font-size: 2rem; display:inline-block"></i>`
-      }
-
-      let weatherStr = ` ${weatherIcon}
-                            <span class="label-condition">${condition1}</span>
-                            <span class="label-condition">${condition2}</span>`
-
-      $('#weatherCondition').html(weatherStr);
-
-
-      // Background condition
-      if (globalShowWeatherBackground) {
-        let bgCondition = '';
-        if (condition1 === 'Clear') {
-          bgCondition = 'background-clear';
-        }
-        if (condition1 === 'Partly Cloudy') {
-          bgCondition = 'background-partly-cloudy'
-        }
-        if (condition1 === 'Cloudy') {
-          bgCondition = 'background-cloudy'
-        }
-
-        if (condition2.includes('Fog')
-          || condition2.includes('Mist')
-          || condition2.includes('Haze')) {
-          bgCondition = 'background-partly-cloudy'
-        }
-
-        if (condition2.includes('Rain')
-          || condition2.includes('Drizzle')
-          || condition2.includes('Thunderstorm')
-          || condition2.includes('Showers')) {
-          bgCondition = 'background-rain'
-        }
-
-        document.querySelector('body').className = bgCondition;
-      }
-      else {
-        document.querySelector('body').className = '';
-      }
-    }
-
-    function updateDepartures(departures) {
-      $('#depList').fadeOut(800, () => {
-        $('#depList').html('');
-        $('#depList').show();
-        let counter = 0;
-        if (departures) {
-          for (let plane of departures) {
+          for (let plane of arrivals) {
             counter += 200;
             let isAirborne = false;
-            let hideDeparted = $('#switchDepsOff').is(':checked');
             let iconString = "";
             switch (plane.status) {
               case "Preparing":
                 iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
-                                           <i class="far fa-clock text-primary"></i>`;
+                                                    <i class="far fa-clock text-primary"></i>`;
                 break;
               case "Taxi Out":
-                iconString = `Taxi to Rwy <i class="fas fa-plane-departure text-primary"></i>`;
-                break;
               case "Departing":
                 iconString = `Departing  <i class="fas fa-plane-departure text-primary"></i>`;
                 break;
               case "Airborne":
-                isAirborne = true;
                 iconString = `ETA ${plane.calculated_arrival_time.toString().padStart(4, 0).substring(0, 2)}:${plane.calculated_arrival_time.toString().padStart(4, 0).substring(2, 4)}z
-                                          <i class="fas fa-plane text-primary"></i>`;
+                                                    <i class="fas fa-plane text-primary"></i>`;
                 break;
               case "Arriving":
-                isAirborne = true;
-                iconString = `Arriving at Airport <i class="fas fa-plane-arrival text-primary"></i>`;
-                break;
               case "Taxi In":
                 isAirborne = true;
-                iconString = `Taxi to Parking <i class="fas fa-plane-arrival text-primary"></i>`;
+                iconString = `Arriving at Airport <i class="fas fa-plane-arrival text-primary"></i>`;
                 break;
               case "Arrived":
                 isAirborne = true;
                 iconString = `Arrived at Airport <i class="fas fa-check text-primary"></i>`;
                 break;
             }
-            if (isAirborne && hideDeparted) {
-              continue;
+
+            let airlineString = '';
+            if (plane.airline_data) {
+              airlineString = plane.airline_data.callsign;
             }
 
-            // Circuits
-            if (plane.flight_plan.departure === plane.flight_plan.arrival) {
-              iconString = `Circuits <i class="fas fa-retweet"></i>`;
-              isAirborne = false;
+            let disabled = (!isAirborne) ? 'opacity:0.8;' : '';
+            let flagString = `<img height="10" width="15" src="images/flags/${plane.dep_airport_country_code}.svg" title="${plane.dep_airport_country}" />`
+            let cardString = ` <li class="list-group-item plane background-logo" id='id-${plane.callsign}' style='display:none; ${disabled}' title="${plane.name}">
+                                                        <h5 class="time-tag">${iconString}</h5>
+                                                        <h5 class="card-title"><strong>${plane.callsign}</strong>
+                                                          <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa} <span class="text-info" style="font-size:smaller">${airlineString}</span></span>
+                                                        </h5>
+                                                        <h6 class="card-subtitle text-danger">
+                                                          <sup class="text-muted">From </sup>
+                                                          <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.departure}');">${flagString} ${plane.flight_plan.departure}</strong>
+                                                          <span class="text-muted airport-name">${plane.dep_airport_shortname} (${plane.dep_airport_name})</span>
+                                                        </h6>
+                                                    </li>`
+            $('#arrList').append(cardString);
+            if (plane.airline_data) {
+              $(`#id-${plane.callsign}`).css('background', `url(${plane.airline_data.logo})`);
             }
-
-            let disabled = (isAirborne) ? 'opacity:0.8;' : '';
-            let flagString = `<img height="10" width="15" src="images/flags/${plane.arr_airport_country_code}.svg" title="${plane.arr_airport_country}" />`
-            let cardString =
-              ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none; ${disabled}' title="${plane.name}" >
-                              <h5 class="time-tag">${iconString}</h5>
-                              <h5 class="card-title" id='title-${plane.callsign}'><strong>${plane.callsign}</strong>
-                                <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
-                              </h5>
-                              <h6 class="card-subtitle text-danger">
-                                <sup class="text-muted">To </sup>
-                                <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.arrival}');">${flagString} ${plane.flight_plan.arrival}</strong>
-                                <span class="text-muted airport-name">${plane.arr_airport_shortname} (${plane.arr_airport_name})</span>
-                              </h6>
-                          </li>`
-            $('#depList').append(cardString);
             $(`#id-${plane.callsign}`).fadeIn(200 + counter);
           }
-        }
-      });
-    }
+        });
+      }
 
-    function updateArrivals(arrivals) {
-      $('#arrList').fadeOut(800, () => {
-        $('#arrList').html('');
-        $('#arrList').show();
-        let counter = 0;
+      function updateFiledData(filedDepartures, filedArrivals) {
+        $('#filedDepList').fadeOut(500, () => {
+          $('#filedDepList').html('');
+          $('#filedDepList').show();
+          let counter = 0;
 
-        for (let plane of arrivals) {
-          counter += 200;
-          let isAirborne = false;
-          let iconString = "";
-          switch (plane.status) {
-            case "Preparing":
-              iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
-                                          <i class="far fa-clock text-primary"></i>`;
-              break;
-            case "Taxi Out":
-            case "Departing":
-              iconString = `Departing  <i class="fas fa-plane-departure text-primary"></i>`;
-              break;
-            case "Airborne":
-              iconString = `ETA ${plane.calculated_arrival_time.toString().padStart(4, 0).substring(0, 2)}:${plane.calculated_arrival_time.toString().padStart(4, 0).substring(2, 4)}z
-                                          <i class="fas fa-plane text-primary"></i>`;
-              break;
-            case "Arriving":
-            case "Taxi In":
-              isAirborne = true;
-              iconString = `Arriving at Airport <i class="fas fa-plane-arrival text-primary"></i>`;
-              break;
-            case "Arrived":
-              isAirborne = true;
-              iconString = `Arrived at Airport <i class="fas fa-check text-primary"></i>`;
-              break;
+          for (let plane of filedDepartures) {
+            counter += 200;
+            let iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
+                                                    <i class="far fa-clock text-primary"></i>`;
+            let cardString = ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none;' title="${plane.name}" >
+                                                        <h5 class="time-tag">${iconString}</h5>
+                                                        <h5 class="card-title" style="margin-bottom: 0px">
+                                                            <strong>${plane.callsign}</strong>
+                                                            <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
+                                                            <span class="filed-title text-danger">
+                                                              <sup class="text-muted">To </sup>
+                                                              <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.arrival}');">${plane.flight_plan.arrival}</strong>
+                                                            </span>
+                                                        </h5>
+                                                    </li>`
+            $('#filedDepList').append(cardString);
+            $(`#id-${plane.callsign}`).fadeIn(300 + counter);
           }
+        });
 
-          let disabled = (!isAirborne) ? 'opacity:0.8;' : '';
-          let flagString = `<img height="10" width="15" src="images/flags/${plane.dep_airport_country_code}.svg" title="${plane.dep_airport_country}" />`
-          let cardString = ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none; ${disabled}' title="${plane.name}">
-                                              <h5 class="time-tag">${iconString}</h5>
-                                              <h5 class="card-title"><strong>${plane.callsign}</strong>
-                                                <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
-                                              </h5>
-                                              <h6 class="card-subtitle text-danger">
-                                                <sup class="text-muted">From </sup>
-                                                <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.departure}');">${flagString} ${plane.flight_plan.departure}</strong>
-                                                <span class="text-muted airport-name">${plane.dep_airport_shortname} (${plane.dep_airport_name})</span>
-                                              </h6>
-                                          </li>`
-          $('#arrList').append(cardString);
-          $(`#id-${plane.callsign}`).fadeIn(200 + counter);
+        $('#filedArrList').fadeOut(500, () => {
+          $('#filedArrList').html('');
+          $('#filedArrList').show();
+          let counter = 0;
+          for (let plane of filedArrivals) {
+            counter += 200;
+            let iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
+                                                    <i class="far fa-clock text-primary"></i>`;
+            let cardString = ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none;' title="${plane.name}">
+                                                      <h5 class="time-tag">${iconString}</h5>
+                                                      <h5 class="card-title" style="margin-bottom: 0px">
+                                                            <strong>${plane.callsign}</strong>
+                                                            <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
+                                                            <span class="filed-title text-danger">
+                                                              <sup class="text-muted">From </sup>
+                                                              <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.departure}');">${plane.flight_plan.departure}</strong>
+                                                            </span>
+                                                        </h5>
+                                                  </li>`
+            $('#filedArrList').append(cardString);
+            $(`#id-${plane.callsign}`).fadeIn(300 + counter);
+          }
+        });
+      }
+
+      function updateAtcData(aerodromeATC, otherATC) {
+        $('#atcList').fadeOut(800, () => {
+          $('#atcList').html('');
+          $('#atcList').show();
+          let counter = 0;
+          for (let atc of aerodromeATC) {
+            counter += 200;
+            let iconString = '';
+            if (atc.callsign.includes('_DEL'))
+              iconString = `<i class="far fa-clipboard"></i>`
+            else if (atc.callsign.includes('_GND'))
+              iconString = `<i class="fas fa-greater-than-equal"></i>`
+            else if (atc.callsign.includes('_TWR'))
+              iconString = `<i class="fas fa-broadcast-tower"></i>`
+            else if (atc.callsign.includes('_APP'))
+              iconString = `<i class="fas fa-wifi"></i>`
+
+            let cardString = `<li class="list-group-item" title="${atc.name}" style="padding:2px">${iconString} ${atc.callsign}
+                                                      <span class='text-muted'>${atc.frequency}</span>
+                                                    </li>`
+            $('#atcList').append(cardString);
+            $(`#id-${atc.callsign}`).fadeIn(200 + counter);
+          }
+        });
+
+        $('#atcClosebyList').fadeOut(800, () => {
+          $('#atcClosebyList').html('');
+          $('#atcClosebyList').show();
+          let counter = 0;
+          for (let atc of otherATC) {
+            counter += 200;
+            iconString = '';
+            if (atc.callsign.includes('_DEL'))
+              iconString = `<i class="far fa-clipboard"></i>`
+            else if (atc.callsign.includes('_GND'))
+              iconString = `<i class="fas fa-greater-than-equal"></i>`
+            else if (atc.callsign.includes('_TWR'))
+              iconString = `<i class="fas fa-broadcast-tower"></i>`
+            else if (atc.callsign.includes('_APP'))
+              iconString = `<i class="fas fa-wifi"></i>`
+            else if (atc.callsign.includes('_CTR'))
+              iconString = `<i class="fas fa-globe"></i>`
+            else if (atc.callsign.includes('_OBS'))
+              iconString = `<i class="fas fa-eye"></i>`
+            else
+              iconString = `<i class="fas fa-question"></i>`
+
+            let cardString = `<li class="list-group-item" title="${atc.name}" style="padding:2px">${iconString} ${atc.callsign}
+                                                      <span class='text-muted'>${atc.frequency}</span>
+                                                    </li>`
+            $('#atcClosebyList').append(cardString);
+            $(`#id-${atc.callsign}`).fadeIn(300 + counter);
+          }
+        });
+      }
+
+      function updateAtis(currentAtis) {
+        if (currentAtis && currentAtis.length > 0) {
+          let atisLetter = currentAtis[0].text_atis.join(' ')
+            .toUpperCase().replace(/\s+/g, '')
+            .indexOf('INFORMATION');
+          let atisCode = currentAtis[0].text_atis.join('')
+            .toUpperCase().replace(/\s+/g, '')
+            .substring(atisLetter + 11, atisLetter + 12);
+          $('#information').html(atisCode);
+          $('#atisText').html(`${currentAtis[0].text_atis.join(' ')}`);
         }
-      });
-    }
-
-    function updateFiledData(filedDepartures, filedArrivals) {
-      $('#filedDepList').fadeOut(800, () => {
-        $('#filedDepList').html('');
-        $('#filedDepList').show();
-        let counter = 0;
-
-        for (let plane of filedDepartures) {
-          counter += 200;
-          let iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
-                                          <i class="far fa-clock text-primary"></i>`;
-          let cardString = ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none;' title="${plane.name}" >
-                                              <h5 class="time-tag">${iconString}</h5>
-                                              <h5 class="card-title" style="margin-bottom: 0px">
-                                                  <strong>${plane.callsign}</strong>
-                                                  <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
-                                                  <span class="filed-title text-danger">
-                                                    <sup class="text-muted">To </sup>
-                                                    <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.arrival}');">${plane.flight_plan.arrival}</strong>
-                                                  </span>
-                                              </h5>
-                                          </li>`
-          $('#filedDepList').append(cardString);
-          $(`#id-${plane.callsign}`).fadeIn(300 + counter);
+        else {
+          $('#information').html('');
+          $('#atisText').html('');
         }
-      });
+      }
 
-      $('#filedArrList').fadeOut(800, () => {
-        $('#filedArrList').html('');
-        $('#filedArrList').show();
-        let counter = 0;
-        for (let plane of filedArrivals) {
-          counter += 200;
-          let iconString = `${plane.flight_plan.deptime.toString().padStart(4, 0).substring(0, 2)}:${plane.flight_plan.deptime.toString().padStart(4, 0).substring(2, 4)}z
-                                          <i class="far fa-clock text-primary"></i>`;
-          let cardString = ` <li class="list-group-item plane" id='id-${plane.callsign}' style='display:none;' title="${plane.name}">
-                                            <h5 class="time-tag">${iconString}</h5>
-                                            <h5 class="card-title" style="margin-bottom: 0px">
-                                                  <strong>${plane.callsign}</strong>
-                                                  <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa}</span>
-                                                  <span class="filed-title text-danger">
-                                                    <sup class="text-muted">From </sup>
-                                                    <strong style="cursor: pointer" onclick="setNewIcao('${plane.flight_plan.departure}');">${plane.flight_plan.departure}</strong>
-                                                  </span>
-                                              </h5>
-                                        </li>`
-          $('#filedArrList').append(cardString);
-          $(`#id-${plane.callsign}`).fadeIn(300 + counter);
+      function setNewIcao(icao) {
+        clearTimeout(globalTick);
+        globalIcao = icao;
+        localStorage.setItem('icao', globalIcao);
+        refresh = false;
+        keepRunways = false;
+        getDataFromServer();
+      }
+
+      function getCloudType(code) {
+        switch (code) {
+          case 0: return 'NULL'
+            break;
+          case 1: return 'Few'
+            break;
+          case 2: return 'Scattered'
+            break;
+          case 3: return 'Broken'
+            break;
+          case 4: return 'Overcast'
+            break;
+          case 5: return 'VV'
+            break;
         }
-      });
-    }
+      }
 
-    function updateAtcData(aerodromeATC, otherATC) {
-      $('#atcList').fadeOut(800, () => {
-        $('#atcList').html('');
-        $('#atcList').show();
-        let counter = 0;
-        for (let atc of aerodromeATC) {
-          counter += 200;
-          let iconString = '';
-          if (atc.callsign.includes('_DEL'))
-            iconString = `<i class="far fa-clipboard"></i>`
-          else if (atc.callsign.includes('_GND'))
-            iconString = `<i class="fas fa-greater-than-equal"></i>`
-          else if (atc.callsign.includes('_TWR'))
-            iconString = `<i class="fas fa-broadcast-tower"></i>`
-          else if (atc.callsign.includes('_APP'))
-            iconString = `<i class="fas fa-wifi"></i>`
-
-          let cardString = `<li class="list-group-item" title="${atc.name}" style="padding:2px">${iconString} ${atc.callsign}
-                                            <span class='text-muted'>${atc.frequency}</span>
-                                          </li>`
-          $('#atcList').append(cardString);
-          $(`#id-${atc.callsign}`).fadeIn(200 + counter);
+      function getCloudIcon(code) {
+        switch (code) {
+          case 0: return ''
+            break;
+          case 1: return '<i class="fa fa-cloud cloud-few"></i>';
+            break;
+          case 2: return '<i class="fa fa-cloud cloud-scattered"></i><i class="fa fa-cloud cloud-few"></i>';
+            break;
+          case 3: return '<i class="fa fa-cloud cloud-broken"></i><i class="fa fa-cloud  cloud-scattered"></i><i class="fa fa-cloud cloud-broken"></i>'
+            break;
+          case 4: return '<i class="fa fa-cloud cloud-overcast"></i><i class="fa fa-cloud cloud-broken"></i><i class="fa fa-cloud cloud-overcast"></i><i class="fa fa-cloud cloud-scattered"></i>'
+            break;
+          case 5: return 'VV'
+            break;
         }
-      });
+      }
 
-      $('#atcClosebyList').fadeOut(800, () => {
-        $('#atcClosebyList').html('');
-        $('#atcClosebyList').show();
-        let counter = 0;
-        for (let atc of otherATC) {
-          counter += 200;
-          iconString = '';
-          if (atc.callsign.includes('_DEL'))
-            iconString = `<i class="far fa-clipboard"></i>`
-          else if (atc.callsign.includes('_GND'))
-            iconString = `<i class="fas fa-greater-than-equal"></i>`
-          else if (atc.callsign.includes('_TWR'))
-            iconString = `<i class="fas fa-broadcast-tower"></i>`
-          else if (atc.callsign.includes('_APP'))
-            iconString = `<i class="fas fa-wifi"></i>`
-          else if (atc.callsign.includes('_CTR'))
-            iconString = `<i class="fas fa-globe"></i>`
-          else if (atc.callsign.includes('_OBS'))
-            iconString = `<i class="fas fa-eye"></i>`
-          else
-            iconString = `<i class="fas fa-question"></i>`
+      function getConditionType(code) {
+        switch (code) {
+          case 'SN': return '<span class="badge bg-info">Snow</span>';
+            break;
+          case 'RN': return '<span class="badge bg-success">Rain</span>';
+            break;
+          case 'RA': return '<span class="badge bg-success">Rain</span>';
+            break;
+          case 'DZ': return '<span class="badge bg-success">Drizzle</span>';
+            break;
+          case 'TS': return '<span class="badge bg-primary">Thunderstorm</span>';
+            break;
+          case 'SH': return '<span class="badge bg-primary">Showers</span>';
+            break;
+          case 'FG': return '<span class="badge bg-warning">Fog</span>';
+            break;
+          case 'BR': return '<span class="badge bg-warning">Mist</span>';
+            break;
+          case 'HZ': return '<span class="badge bg-warning">Haze</span>';
+            break;
+          case 'VA': return '<span class="badge bg-warning">Ash</span>';
+            break;
+          case 'FU': return '<span class="badge bg-warning">Smoke</span>';
+            break;
+          case 'SS': return '<span class="badge bg-warning">Sandstorm</span>';
+            break;
+          default: return '<span class="badge bg-info">Unknown</span>';
+            break;
 
-          let cardString = `<li class="list-group-item" title="${atc.name}" style="padding:2px">${iconString} ${atc.callsign}
-                                            <span class='text-muted'>${atc.frequency}</span>
-                                          </li>`
-          $('#atcClosebyList').append(cardString);
-          $(`#id-${atc.callsign}`).fadeIn(300 + counter);
         }
-      });
-    }
-
-    function updateAtis(currentAtis) {
-      if (currentAtis && currentAtis.length > 0) {
-        let atisLetter = currentAtis[0].text_atis.join(' ')
-          .toUpperCase().replace(/\s+/g, '')
-          .indexOf('INFORMATION');
-        let atisCode = currentAtis[0].text_atis.join('')
-          .toUpperCase().replace(/\s+/g, '')
-          .substring(atisLetter + 11, atisLetter + 12);
-        $('#information').html(atisCode);
-        $('#atisText').html(`${currentAtis[0].text_atis.join(' ')}`);
       }
-      else {
-        $('#information').html('');
-        $('#atisText').html('');
+
+      function switchTempType(celsius) {
+        localStorage.setItem('temptype', celsius);
+        if (celsius) {
+          let newTemp = fToC(parseInt($('#labelTemp')
+            .html().replace(' °F', ''))).toFixed(0);
+          let newDew = fToC(parseInt($('#labelDew')
+            .html().replace(' °F', ''))).toFixed(0);
+          $('#labelTemp').html(`${newTemp} °C`);
+          $('#labelDew').html(`${newDew} °C`);
+        } else {
+          let newTemp = cToF(parseInt($('#labelTemp')
+            .html().replace(' °C', ''))).toFixed(0);
+          let newDew = cToF(parseInt($('#labelDew')
+            .html().replace(' °C', ''))).toFixed(0);
+          $('#labelTemp').html(`${newTemp} °F`);
+          $('#labelDew').html(`${newDew} °F`);
+        }
       }
-    }
 
-    function setNewIcao(icao) {
-      clearTimeout(globalTick);
-      globalIcao = icao;
-      localStorage.setItem('icao', globalIcao);
-      refresh = false;
-      keepRunways = false;
-      getDataFromServer();
-    }
-
-    function getCloudType(code) {
-      switch (code) {
-        case 0: return 'NULL'
-          break;
-        case 1: return 'Few'
-          break;
-        case 2: return 'Scattered'
-          break;
-        case 3: return 'Broken'
-          break;
-        case 4: return 'Overcast'
-          break;
-        case 5: return 'VV'
-          break;
+      function cToF(celsius) {
+        var cTemp = celsius;
+        var cToFahr = cTemp * 9 / 5 + 32;
+        return cToFahr;
       }
-    }
 
-    function getCloudIcon(code) {
-      switch (code) {
-        case 0: return ''
-          break;
-        case 1: return '<i class="fa fa-cloud cloud-few"></i>';
-          break;
-        case 2: return '<i class="fa fa-cloud cloud-scattered"></i><i class="fa fa-cloud cloud-few"></i>';
-          break;
-        case 3: return '<i class="fa fa-cloud cloud-broken"></i><i class="fa fa-cloud  cloud-scattered"></i><i class="fa fa-cloud cloud-broken"></i>'
-          break;
-        case 4: return '<i class="fa fa-cloud cloud-overcast"></i><i class="fa fa-cloud cloud-broken"></i><i class="fa fa-cloud cloud-overcast"></i><i class="fa fa-cloud cloud-scattered"></i>'
-          break;
-        case 5: return 'VV'
-          break;
+      function fToC(fahrenheit) {
+        var fTemp = fahrenheit;
+        var fToCel = (fTemp - 32) * 5 / 9;
+        return fToCel;
       }
-    }
-
-    function getConditionType(code) {
-      switch (code) {
-        case 'SN': return '<span class="badge bg-info">Snow</span>';
-          break;
-        case 'RN': return '<span class="badge bg-success">Rain</span>';
-          break;
-        case 'RA': return '<span class="badge bg-success">Rain</span>';
-          break;
-        case 'DZ': return '<span class="badge bg-success">Drizzle</span>';
-          break;
-        case 'TS': return '<span class="badge bg-primary">Thunderstorm</span>';
-          break;
-        case 'SH': return '<span class="badge bg-primary">Showers</span>';
-          break;
-        case 'FG': return '<span class="badge bg-warning">Fog</span>';
-          break;
-        case 'BR': return '<span class="badge bg-warning">Mist</span>';
-          break;
-        case 'HZ': return '<span class="badge bg-warning">Haze</span>';
-          break;
-        case 'VA': return '<span class="badge bg-warning">Ash</span>';
-          break;
-        case 'FU': return '<span class="badge bg-warning">Smoke</span>';
-          break;
-        case 'SS': return '<span class="badge bg-warning">Sandstorm</span>';
-          break;
-        default: return '<span class="badge bg-info">Unknown</span>';
-          break;
-
-      }
-    }
-
-    function switchTempType(celsius) {
-      localStorage.setItem('temptype', celsius);
-      if (celsius) {
-        let newTemp = fToC(parseInt($('#labelTemp')
-          .html().replace(' °F', ''))).toFixed(0);
-        let newDew = fToC(parseInt($('#labelDew')
-          .html().replace(' °F', ''))).toFixed(0);
-        $('#labelTemp').html(`${newTemp} °C`);
-        $('#labelDew').html(`${newDew} °C`);
-      } else {
-        let newTemp = cToF(parseInt($('#labelTemp')
-          .html().replace(' °C', ''))).toFixed(0);
-        let newDew = cToF(parseInt($('#labelDew')
-          .html().replace(' °C', ''))).toFixed(0);
-        $('#labelTemp').html(`${newTemp} °F`);
-        $('#labelDew').html(`${newDew} °F`);
-      }
-    }
-
-    function cToF(celsius) {
-      var cTemp = celsius;
-      var cToFahr = cTemp * 9 / 5 + 32;
-      return cToFahr;
-    }
-
-    function fToC(fahrenheit) {
-      var fTemp = fahrenheit;
-      var fToCel = (fTemp - 32) * 5 / 9;
-      return fToCel;
-    }
-  </script>
+    </script>
 </body>
 </html>
+
+<!--References
+- OpenAIP data
+- csharp-metar-decoder
+- Boerman-OpenAIP reader
+- https://flagicons.lipis.dev/
+-I used the databases supplied by OurAirports, which is an invaluable resource for getting airport locations and runway information. Find them at https://ourairports.com/-->
+

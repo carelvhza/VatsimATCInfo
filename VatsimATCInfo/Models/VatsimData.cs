@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Boerman.OpenAip;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -66,6 +67,7 @@ namespace VatsimATCInfo.Models
         public double distance_to_arr { get; set; }
         public string status { get; set; }
         public int calculated_arrival_time { get; set; }
+        public Airline airline_data { get; set; }
     }
 
     public class Controller
@@ -158,6 +160,7 @@ namespace VatsimATCInfo.Models
         public string current_airport_country_code { get; set; }
         public double current_airport_lat { get; set; }
         public double current_airport_lon { get; set; }
+        public AirportAirspace current_airport_airspace { get; set; }
         public int airport_height { get; set; }
         public List<Runway> current_airport_runways { get; set; }
         public List<ATC> online_atc { get; set; }

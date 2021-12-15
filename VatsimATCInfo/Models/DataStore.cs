@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.Hosting;
+using Boerman.OpenAip;
+using Newtonsoft.Json;
 
 namespace VatsimATCInfo.Models
 {
@@ -11,15 +13,23 @@ namespace VatsimATCInfo.Models
         private static List<AirportData> _airports = new List<AirportData>();
         private static List<Country> _countries = new List<Country>();
         private static List<Runway> _runways = new List<Runway>();
+        private static List<Airspace> _airspaces = new List<Airspace>();
+        private static List<Airline> _airlines = new List<Airline>();
 
         public static List<AirportData> GetAirports()
         {
             return _airports;
         }
 
-        public static void LoadData()
+        public static List<Airspace> GetAirspaces()
         {
+            return _airspaces;
+        }
+
+        public static void LoadData()
+        {           
             LoadCountries();
+            LoadAirlines();
             LoadRunways();
             LoadAirports();
         }
@@ -29,11 +39,15 @@ namespace VatsimATCInfo.Models
             return new string(input.Where(c => char.IsDigit(c)).ToArray());
         }
 
+        public static Airline GetAirline(string icao)
+        {
+            return _airlines.FirstOrDefault(al => al.icao == icao);
+        }
+
         private static void LoadAirports()
         {
             var mainFile = File.ReadAllLines(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "airports_new.dat"));
             var airportData = new List<AirportData>();
-
             var c = 0;
             foreach (var item in mainFile)
             {
@@ -98,6 +112,50 @@ namespace VatsimATCInfo.Models
             _countries = countryData;
         }
 
+        private static void LoadAirlines()
+        {
+            var mainFile = File.ReadAllText(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "airline_data_daisycon.json"));
+            var airlineData = JsonConvert.DeserializeObject<List<Airline>>(mainFile);
+            _airlines = airlineData;          
+        }
+
+        public static Airspace GetAirspace(string countryCode, string name, string suffix)
+        {
+            var path = Path.Combine(HostingEnvironment.ApplicationPhysicalPath, $"openaipdata",$"{countryCode}_asp.aip");
+           
+            if (File.Exists(path))
+            {
+                var data = File.ReadAllText(path);
+                if (!string.IsNullOrEmpty(data))
+                {
+                    var countryAirspaceData = Boerman.OpenAip.Parsers.Airspace.Parse(data).ToList();
+                    if (countryAirspaceData.Any())
+                    {
+                        var result = countryAirspaceData.FirstOrDefault(a =>
+                            a.Name.ToUpper().Contains(name.ToUpper())
+                            && 
+                                (
+                                    a.Name.ToUpper().Contains(" CTLZ")
+                                    || a.Name.ToUpper().Contains(" CLTZ")
+                                    || a.Name.ToUpper().Contains(" CLASS B")
+                                    || a.Name.ToUpper().Contains(" CTR")
+                                    || a.Name.ToUpper().Contains(" CONTROL ZONE")
+                                )
+                            );
+                       
+                        return result;
+                    }
+                    else
+                        return null;
+                }
+            }
+            else
+            {
+                throw new Exception("Path: " + path);
+            }
+            return null;
+        }
+
         private static void LoadRunways()
         {
             var mainFile = File.ReadAllLines(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "runways.csv"));
@@ -117,18 +175,6 @@ namespace VatsimATCInfo.Models
                     int.TryParse(primaryWithoutLetters, out primaryDegrees);
                     int.TryParse(secondaryWithoutLetters, out secondaryDegrees);
 
-                    //runwayData.Add(new Runway()
-                    //{
-                    //    ICAO = split[2]?.Replace("\"", ""),
-                    //    Primary = split[8]?.Replace("\"", ""),
-                    //    PrimaryDegrees = primaryDegrees,
-                    //    Secondary = split[14]?.Replace("\"", ""),
-                    //    SecondaryDegrees = secondaryDegrees,
-                    //    PrimaryLat = !string.IsNullOrEmpty(split[9]) ? Convert.ToDouble(split[9]) : 0.0,
-                    //    PrimaryLon = !string.IsNullOrEmpty(split[10]) ? Convert.ToDouble(split[10]) : 0.0,
-                    //    SecondaryLat = !string.IsNullOrEmpty(split[15]) ? Convert.ToDouble(split[15]) : 0.0,
-                    //    SecondaryLon = !string.IsNullOrEmpty(split[16]) ? Convert.ToDouble(split[16]) : 0.0
-                    //});
                     var rw = new Runway();
                     rw.ICAO = split[2]?.Replace("\"", "");
                     rw.Primary = split[8]?.Replace("\"", "");
