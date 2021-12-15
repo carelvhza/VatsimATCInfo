@@ -329,6 +329,10 @@
     background-clip: padding-box !important;
   }
 
+  .callsign-title-text {
+    cursor: pointer;
+  }
+
 </style>
 <body>
   <div id="body-global">
@@ -657,38 +661,37 @@
   <div class="modal fade" id="modalAircraft" tabindex="-1" aria-labelledby="modalAircraft" aria-hidden="true" style="zoom: inherit">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header bg-success text-white" style="height:42px; padding:3px; padding-left:10px;">
+        <div id="modalAircraftHeader" class="modal-header bg-success text-white" style="height:42px; padding:3px; padding-left:10px;">
           <h3 class="modal-title" id="modalAircraftLabel"></h3>
-          <h3 style="padding:5px;float:right"><i class="fas fa-plane text-primary"></i> Airborne</h3>
+          <h3 style="padding:5px;float:right" id="labelAircraftState"><i class="fas fa-plane text-primary"></i></h3>
           <!--<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>-->
         </div>
         <div class="modal-body" style=" padding: 1rem;">
           <div class="row">
             <div class="col-sm-4">
               <p class="text-info"><i class="fa fa-plane-departure"></i> Departure</p>
-              <img height="30" src="images/flags/za.svg" title="South Africa" /><br />
-              <h5 class="text-success" style="margin:4px; font-weight:bold">FACT <span class="text-muted">Cape Town</span></h5>
-             
+              <img id="labelAircraftDepartureFlag" height="30" src="images/flags/za.svg" title="" /><br />
+              <h5 id="labelAircraftDepartureName" class="text-success" style="margin:4px; font-weight:bold"> <span class="text-muted"></span></h5>             
             </div>
             <div class="col-sm-4" style="text-align:center">
               <div>
                 <span class="" style="font-weight:bold">Enroute</span><br />
-                <span>11h13</span><br />
+                <span id="labelAircraftEnroute"></span><br />
                 <span class="" style="font-weight:bold">ETA</span><br />
-                <span>18:32z</span>
+                <span id="labelAircraftEta"></span>
               </div>
             </div>
             <div class="col-sm-4" style="text-align:right;">
               <p class="text-info"><i class="fa fa-plane-arrival"></i> Arrival</p>
-              <img height="30" src="images/flags/gb.svg" title="United Kingdom" /><br />
-              <h5 class="text-success" style="margin:4px; font-weight:bold">EGLL <span class="text-muted">London</span></h5>
+              <img id="labelAircraftArrivalFlag" height="30" src="images/flags/za.svg" title="" /><br />
+              <h5 id="labelAircraftArrivalName" class="text-success" style="margin:4px; font-weight:bold"> <span class="text-muted"></span></h5>
             </div>
           </div>
           <div class="row">
             <div class="col-sm-12">
               <div class="info-box">
                 <span class="text-info" style="font-size:larger"><i class="fa fa-route"></i> Route</span>
-                <p>OKTE1C OKTED DCT EPNET/N0479F350 DCT 42S030E/N0477F340 48S040E/N0477F330 50S050E/N0476F350 52S060E 52S070E 52S080E 52S090E 50S100E 48S110E 46S120E/N0475F370 44S130E 40S140E DCT ML H129 DOSEL Y59 RIVET RIVET3</p>
+                <p id="labelAircraftRoute"></p>
               </div>
             </div>
           </div>
@@ -696,31 +699,28 @@
             <div class="col-sm-12">
               <div class="info-box">
                 <span class="text-info" style="font-size:larger"><i class="fa fa-sticky-note"></i> Remarks</span>
-                <p>PBN/A1B1D1O1S2 NAV/RNVD1E2A1 RNP2 DAT/CPDLCX 1FANSP2PDC SUR/260B RSP180 DOF/211215 REG/GYMML EET/FAJO0042 YMMM0446 SEL/BJKL CODE/4007EE OPR/BAW ORGN/EGLLBAWH PER/D RVR/075 RMK/LAHSO NOT AUTHORISED TCAS DSP CTC EGLLBAWC LHRWYBA /V/</p>
+                <p id="labelAircraftRemarks"></p>
               </div>
             </div>
           </div>
-
-         
-
           <hr />
           <div class="row">
             <div class="col-sm-6">
               <div class="card-body">
-                <h5 id="labelAircraft" class="card-title"><span class="text-warning" style="font-size:larger"><i class="fa fa-plane"></i></span> H/B772/L</h5>
-                <h6 class="card-subtitle text-muted"><span class="" style="font-size:larger"><i class="fa fa-user"></i></span> Dan EGLL</h6>
+                <h5 id="labelAircraft" class="card-title"><span class="text-warning" style="font-size:larger" id="labelAircraftAircraftType"><i class="fa fa-plane"></i></span></h5>
+                <h6 class="card-subtitle text-muted"><span class="" style="font-size:larger" id="labelAircraftName"></h6>
               </div>
               <ul class="list-group list-group-flush list-group">
-                <li class="list-group-item"><span class="text-warning">ALT</span> 34936</li>
-                <li class="list-group-item"><span class="text-warning">SPD</span> 581</li>
-                <li class="list-group-item"><span class="text-warning">HDG</span> 90</li>
-                <li class="list-group-item"><span class="text-warning">SSR</span> 2000</li>
+                <li class="list-group-item" id="labelAircraftAlt"><span class="text-warning">ALT</span> </li>
+                <li class="list-group-item" id="labelAircraftSpd"><span class="text-warning">SPD</span> </li>
+                <li class="list-group-item" id="labelAircraftHdg"><span class="text-warning">HDG</span> </li>
+                <li class="list-group-item" id="labelAircraftSsr"><span class="text-warning">SSR</span> </li>
               </ul>  
             </div>
-            <div class="col-sm-6" style="text-align:center;">
-              <img src="https://daisycon.io/images/airline/index.php?iata=wn&width=300&height=150&color=#0000ffff" height="75" /><br />
-              <span class="text-muted">Southwest Airlines</span><br />
-              <h3 class="text-info">Southwest</h3>
+            <div class="col-sm-6" style="text-align:center; display:none;">
+              <img id="labelAircraftAirlineLogo" src="" height="75" /><br />
+              <span id="labelAircraftAirlineName" class="text-muted"></span><br />
+              <h3 id="labelAircraftAirlineLCallsign" class="text-info"></h3>
             </div>
           </div>
         </div>
@@ -1141,11 +1141,69 @@
         map.addLayer(leafletMarkers);
       }
 
-      function showAircraftModal(callsign) {
-        //let plane = globalAirportInfo.pilots.filter(a => a.callsign === callsign)[0];
+      function showAircraftModal(callsign, atype) {
+        $('#modalAircraftHeader').removeClass('bg-success');
+        $('#modalAircraftHeader').removeClass('bg-danger');
+        if (atype === 'dep') {
+          $('#modalAircraftHeader').addClass('bg-success');
+        }
+        else {
+          $('#modalAircraftHeader').addClass('bg-danger');
+        }
+        let plane = globalAirportInfo.pilots.filter(a => a.callsign === callsign)[0];
         $('#modalAircraftLabel').html(callsign);
+      
+
+        let str = $(`#id-${plane.callsign} > h5.time-tag`).html();
+        $('#labelAircraftState').html(`${str} ${plane.status}`);
+
+        $('#labelAircraftDepartureFlag').prop('src', `images/flags/${plane.dep_airport_country_code}.svg`);
+        $('#labelAircraftDepartureFlag').prop('title', `${plane.dep_airport_country}`);
+        if (plane.flight_plan) {
+          $('#labelAircraftDepartureName')
+            .html(`${plane.flight_plan.departure}<br /> <span class="text-muted">${plane.dep_airport_shortname}</span>`);
+        }
+
+        if (plane.flight_plan) {
+          $('#labelAircraftEnroute')
+            .html(`${plane.flight_plan.enroute_time.substring(0, 2)}h${plane.flight_plan.enroute_time.substring(2,4)}`);
+        }
+           
+        $('#labelAircraftEta')
+          .html(`${plane.calculated_arrival_time.toString().substring(0, 2)}:${plane.calculated_arrival_time.toString().substring(2, 4)}z`);
+
+        $('#labelAircraftArrivalFlag').prop('src', `images/flags/${plane.arr_airport_country_code}.svg`);
+        $('#labelAircraftArrivalFlag').prop('title', `${plane.arr_airport_country}`);
+        if (plane.flight_plan) {
+          $('#labelAircraftArrivalName')
+            .html(`${plane.flight_plan.arrival}<br /> <span class="text-muted">${plane.arr_airport_shortname}</span>`);
+        }
+        if (plane.flight_plan) {
+          $('#labelAircraftRoute').html(plane.flight_plan.route);
+          $('#labelAircraftRemarks').html(plane.flight_plan.remarks);
+        }
+
+        if (plane.flight_plan) {
+          $('#labelAircraft')
+            .html(`<span class="text-warning" style="font-size:larger"><i class="fa fa-plane"></i></span> ${plane.flight_plan.aircraft_faa}`);
+        }
+        $('#labelAircraftName').html(`<i class="fa fa-user"></i></span> ${plane.name}`)
+        $('#labelAircraftAlt').html(`<span class="text-warning">ALT</span> ${plane.altitude}</li>`);
+        $('#labelAircraftSpd').html(`<span class="text-warning">SPD</span> ${plane.groundspeed}</li>`);
+        $('#labelAircraftHdg').html(`<span class="text-warning">HDG</span> ${plane.heading}</li>`);
+        $('#labelAircraftSsr').html(`<span class="text-warning">SSR</span> ${plane.transponder}</li>`);
+
+        if (plane.airline_data) {
+          $('#labelAircraftAirlineLogo').parent().show();
+          $('#labelAircraftAirlineLogo').prop('src', `${plane.airline_data.logo}`);
+          $('#labelAircraftAirlineName').html(`${plane.airline_data.name}`)
+          $('#labelAircraftAirlineLCallsign').html(`${plane.airline_data.callsign}`)
+        }
+        else {
+          $('#labelAircraftAirlineLogo').parent().hide();
+        }
+
         $('#buttonAircraft').click();
-        console.log(callsign);
       }
 
       function updateRunwayDirection(runwaydata) {
@@ -1688,7 +1746,7 @@
               let cardString =
                 ` <li class="list-group-item plane background-logo" id='id-${plane.callsign}' style='display:none; ${disabled}' title="${plane.name}" >
                                         <h5 class="time-tag">${iconString}</h5>
-                                        <h5 class="card-title" id='title-${plane.callsign}'><strong onclick="showAircraftModal('${plane.callsign}')">${plane.callsign}</strong>
+                                        <h5 class="card-title" id='title-${plane.callsign}'><strong class='callsign-title-text' onclick="showAircraftModal('${plane.callsign}', 'dep')">${plane.callsign}</strong>
                                           <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa} <span class="text-info" style="font-size:smaller">${airlineString}</span></span>
                                         </h5>
                                         <h6 class="card-subtitle text-danger">
@@ -1750,7 +1808,7 @@
             let flagString = `<img height="10" width="15" src="images/flags/${plane.dep_airport_country_code}.svg" title="${plane.dep_airport_country}" />`
             let cardString = ` <li class="list-group-item plane background-logo" id='id-${plane.callsign}' style='display:none; ${disabled}' title="${plane.name}">
                                                         <h5 class="time-tag">${iconString}</h5>
-                                                        <h5 class="card-title"><strong>${plane.callsign}</strong>
+                                                        <h5 class="card-title"><strong class='callsign-title-text' onclick="showAircraftModal('${plane.callsign}', 'arr')">${plane.callsign}</strong>
                                                           <span class="plane-type text-dark">${plane.flight_plan.aircraft_faa} <span class="text-info" style="font-size:smaller">${airlineString}</span></span>
                                                         </h5>
                                                         <h6 class="card-subtitle text-danger">
