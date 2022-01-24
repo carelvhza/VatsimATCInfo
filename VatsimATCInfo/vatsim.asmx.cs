@@ -266,6 +266,13 @@ namespace VatsimATCInfo
             return metar;
         }
 
+        [WebMethod]
+        [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+        public LoaderData GetLoadingStatus()
+        { 
+            return DataStore.GetCurrentLoadingStatus();
+        }
+
         private List<RadioSource> _getTransceivers()
         {
             var client = new RestClient("https://data.vatsim.net/");

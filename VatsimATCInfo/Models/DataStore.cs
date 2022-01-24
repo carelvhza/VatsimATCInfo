@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Web.Hosting;
 using Boerman.OpenAip;
 using Newtonsoft.Json;
@@ -15,6 +16,11 @@ namespace VatsimATCInfo.Models
         private static List<Runway> _runways = new List<Runway>();
         private static List<Airspace> _airspaces = new List<Airspace>();
         private static List<Airline> _airlines = new List<Airline>();
+        private static bool _loaded = false;
+        private static int _percentage = 0;
+        private static Thread _mainThread = null;
+        private static string _loadingStatus = "Preparing...";
+
 
         public static List<AirportData> GetAirports()
         {
@@ -27,11 +33,32 @@ namespace VatsimATCInfo.Models
         }
 
         public static void LoadData()
-        {           
+        {
+            if (_loaded == false && _mainThread == null)
+            {
+                _mainThread = new Thread(() => LoadControl());
+                _mainThread.Start();
+            }
+        }
+
+        public static void LoadControl()
+        {
             LoadCountries();
             LoadAirlines();
             LoadRunways();
             LoadAirports();
+            _loadingStatus = "Finishing...";
+            _loaded = true;
+        }
+
+        public static LoaderData GetCurrentLoadingStatus()
+        {
+            return new LoaderData()
+            {
+                Loaded = _loaded,
+                LoadingStatus = _loadingStatus,
+                TotalPercentage = _percentage
+            };
         }
 
         private static string _getNumbers(string input)
@@ -46,6 +73,8 @@ namespace VatsimATCInfo.Models
 
         private static void LoadAirports()
         {
+            _loadingStatus = "Loading airports...";
+            int calc = 0;
             var mainFile = File.ReadAllLines(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "airports_new.dat"));
             var airportData = new List<AirportData>();
             var c = 0;
@@ -79,7 +108,10 @@ namespace VatsimATCInfo.Models
                         Country = country
                     });
                 }
+                calc = Convert.ToInt32(((decimal)c / (decimal)mainFile.Length) * 100m);
+                _percentage = calc;
             }
+            _percentage = 100;
             _airports = airportData;
         }
 
@@ -91,6 +123,8 @@ namespace VatsimATCInfo.Models
 
         private static void LoadCountries()
         {
+            _loadingStatus = "Loading countries...";
+            int calc = 0;
             var mainFile = File.ReadAllLines(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "countries.dat"));
             var countryData = new List<Country>();
 
@@ -108,15 +142,20 @@ namespace VatsimATCInfo.Models
                         Continent = split[2]
                     });
                 }
+                calc = Convert.ToInt32(((decimal)c / (decimal)mainFile.Length) * 100m);
+                _percentage = calc;
             }
+            _percentage = 100;
             _countries = countryData;
         }
 
         private static void LoadAirlines()
-        {
+        {            
+            _loadingStatus = "Loading airlines...";
             var mainFile = File.ReadAllText(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "airline_data_daisycon.json"));
             var airlineData = JsonConvert.DeserializeObject<List<Airline>>(mainFile);
-            _airlines = airlineData;          
+            _airlines = airlineData;
+            _percentage = 0;
         }
 
         public static Airspace GetAirspace(string countryCode, string name, string suffix)
@@ -158,6 +197,8 @@ namespace VatsimATCInfo.Models
 
         private static void LoadRunways()
         {
+            int calc = 0;
+            _loadingStatus = "Loading runway data...";
             var mainFile = File.ReadAllLines(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "runways.csv"));
             var runwayData = new List<Runway>();
             var c = 0;
@@ -187,7 +228,10 @@ namespace VatsimATCInfo.Models
                     rw.SecondaryLon = !string.IsNullOrEmpty(split[16]) ? Convert.ToDouble(split[16]) : 0.0;
                     runwayData.Add(rw);
                 }
+                calc = Convert.ToInt32(((decimal)c / (decimal)mainFile.Length) * 100m);
+                _percentage = calc;
             }
+            _percentage = 100;
             _runways = runwayData;
         }
     }
