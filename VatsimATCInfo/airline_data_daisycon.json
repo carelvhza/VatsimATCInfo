@@ -37841,14 +37841,14 @@
   },
   {
     "id": 6882,
-    "name": "Mustique Airways",
+    "name": "Makhado Airlines",
     "alias": "",
-    "callsign": "MUSTIQUE",
-    "country": "Barbados",
-    "country_code": "BB",
+    "callsign": "MAKHADO",
+    "country": "South Africa",
+    "country_code": "ZA",
     "iata": "",
     "icao": "MAW",
-    "logo": ""
+    "logo": "https://sky-net.co.za/vatsim-airport-info/images/makhado.png"
   },
   {
     "id": 6884,
@@ -46687,12 +46687,12 @@
     "id": 8490,
     "name": "Safair",
     "alias": "",
-    "callsign": "CARGO",
+    "callsign": "SAFAIR",
     "country": "South Africa",
     "country_code": "ZA",
     "iata": "FA",
     "icao": "SFR",
-    "logo": "https://daisycon.io/images/airline/index.php?iata=fa&width=150&height=70&color=#0000ffff"
+    "logo": "https://sky-net.co.za/vatsim-airport-info/images/safair.png"
   },
   {
     "id": 8492,
